@@ -1,0 +1,34 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEFAULT_SITE_SETTINGS = void 0;
+exports.DEFAULT_SITE_SETTINGS = {
+    id: "main",
+    aboutTitle: "IQ Bolalar - kelajak uchun aqlli avlod",
+    aboutSubtitle: "Biz bolalar uchun mantiqiy fikrlash, tahlil qilish va mustaqil o'rganish ko'nikmalarini rivojlantiradigan platformamiz.",
+    aboutDescription: "Platformada mavzular bo'yicha materiallar, interaktiv testlar va natijalarni tahlil qilish imkoniyatlari mavjud. Maqsadimiz - bolalarning o'qishga bo'lgan qiziqishini oshirish va ularda chuqur fikrlashni shakllantirish.",
+    aboutMission: "Har bir bolaga zamonaviy va tushunarli kontent orqali o'z salohiyatini ochishga yordam berish. Ota-onalar va ustozlar uchun ham qulay kuzatuv va rivojlanish muhiti yaratish.",
+    aboutAddress: "Toshkent shahri, Yunusobod tumani, Amir Temur ko'chasi 12",
+    aboutPhone: "+998 90 123 45 67",
+    aboutEmail: "info@iqbolalar.uz",
+    aboutTelegram: "@iqbolalar",
+    aboutWorkingHours: "Dushanba - Shanba, 09:00 - 18:00",
+    footerBrand: "IQ Bolalar",
+    footerDescription: "Bolalar uchun mantiqiy fikrlash, testlar va foydali materiallar platformasi.",
+    footerPagesTitle: "Sahifalar",
+    footerContactsTitle: "Kontakt",
+    footerLinkHomeLabel: "Bosh sahifa",
+    footerLinkHomePath: "/",
+    footerLinkMaterialsLabel: "Materiallar",
+    footerLinkMaterialsPath: "/materiallar",
+    footerLinkQuizLabel: "Testlar",
+    footerLinkQuizPath: "/test",
+    footerLinkAboutLabel: "O'zimiz haqida",
+    footerLinkAboutPath: "/o-nas",
+    footerAddress: "Toshkent shahri, Yunusobod tumani, Amir Temur ko'chasi 12",
+    footerPhone: "+998 90 123 45 67",
+    footerEmail: "info@iqbolalar.uz",
+    footerTelegram: "@iqbolalar",
+    footerWorkingHours: "Dushanba - Shanba, 09:00 - 18:00",
+    footerCopyright: "IQ Bolalar. Barcha huquqlar himoyalangan.",
+};
+//# sourceMappingURL=default-settings.js.map

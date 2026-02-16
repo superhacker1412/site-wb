@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.apiRouter = void 0;
+const express_1 = require("express");
+const auth_router_1 = require("./modules/auth/auth.router");
+const content_router_1 = require("./modules/content/content.router");
+const quiz_router_1 = require("./modules/quiz/quiz.router");
+const me_router_1 = require("./modules/me/me.router");
+const admin_router_1 = require("./modules/admin/admin.router");
+const health_router_1 = require("./modules/health/health.router");
+const site_router_1 = require("./modules/site/site.router");
+exports.apiRouter = (0, express_1.Router)();
+exports.apiRouter.use("/health", health_router_1.healthRouter);
+exports.apiRouter.use("/auth", auth_router_1.authRouter);
+exports.apiRouter.use("/", content_router_1.contentRouter);
+exports.apiRouter.use("/quiz", quiz_router_1.quizRouter);
+exports.apiRouter.use("/me", me_router_1.meRouter);
+exports.apiRouter.use("/admin", admin_router_1.adminRouter);
+exports.apiRouter.use("/site", site_router_1.siteRouter);
+//# sourceMappingURL=routes.js.map
