@@ -642,9 +642,10 @@ export default function Cabinet() {
                       <p className="line-clamp-2 text-sm text-muted-foreground">{material.description}</p>
                       <div className="text-xs text-muted-foreground">{material.category?.name || "Kategoriya ko'rsatilmagan"}</div>
                       <div className="flex gap-2 pt-1">
-                        <Button size="sm" variant="outline" asChild>
-                          <Link to={`/materiallar/${material.id}`}>Ochish</Link>
-                        </Button>
+                    <Button size="sm" variant="outline" asChild>
+  <Link to={`/test/${direction.id}`}>O&apos;tish</Link>
+</Button>
+
                         <Button
                           size="sm"
                           variant="secondary"

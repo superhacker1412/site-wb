@@ -64,6 +64,8 @@ const App = () => (
               <Route path="/o-sebe" element={<AboutPage />} />
               <Route path="/materiallar" element={<Materials />} />
               <Route path="/materiallar/:id" element={<MaterialDetail />} />
+
+              {/* ✅ список тестов */}
               <Route
                 path="/test"
                 element={
@@ -72,6 +74,17 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+
+              {/* ✅ NEW: открытие теста по ID */}
+              <Route
+                path="/test/:id"
+                element={
+                  <ProtectedRoute>
+                    <Quiz />
+                  </ProtectedRoute>
+                }
+              />
+
               <Route path="/kirish" element={<Login />} />
               <Route path="/royxat" element={<Register />} />
               <Route
@@ -82,6 +95,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+
               <Route
                 path="/admin"
                 element={
@@ -126,6 +140,7 @@ const App = () => (
                 <Route path="schools/:id/edit" element={<AdminSchoolFormPage />} />
                 <Route path="audit" element={<AdminAuditPage />} />
               </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

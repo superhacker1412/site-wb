@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Star, Trophy, ArrowRight } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate, useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,11 +19,20 @@ export default function Quiz() {
   const { favoriteTests, toggleFavoriteTest, refreshTestHistory } = useAuth();
   const { toast } = useToast();
 
+  const navigate = useNavigate();
+  const params = useParams();
+  const routeDirId = (params.id ?? "").trim();
+
   const [phase, setPhase] = useState<Phase>("select");
   const [selectedDir, setSelectedDir] = useState("");
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [result, setResult] = useState<{ score: number; total: number; percentage: number; directionName: string } | null>(null);
+  const [result, setResult] = useState<{
+    score: number;
+    total: number;
+    percentage: number;
+    directionName: string;
+  } | null>(null);
   const [details, setDetails] = useState<QuizSubmitDetail[]>([]);
 
   const directionsQuery = useQuery({
@@ -37,7 +47,10 @@ export default function Quiz() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: (payload: { directionId: string; answers: Array<{ questionId: string; selectedAnswerIndex: number }> }) =>
+    mutationFn: (payload: {
+      directionId: string;
+      answers: Array<{ questionId: string; selectedAnswerIndex: number }>;
+    }) =>
       apiFetch<{
         attempt: { score: number; total: number; percentage: number; directionName: string };
         details: QuizSubmitDetail[];
@@ -56,6 +69,7 @@ export default function Quiz() {
     [directions, selectedDir],
   );
 
+  // ✅ start logic in one place
   const startDirection = (directionId: string) => {
     setSelectedDir(directionId);
     setCurrentQ(0);
@@ -63,6 +77,35 @@ export default function Quiz() {
     setDetails([]);
     setResult(null);
     setPhase("quiz");
+  };
+
+  // ✅ NEW: если открыли /test/:id — автоматически стартуем этот тест
+  useEffect(() => {
+    if (!routeDirId) return;
+    if (!directions.length) return; // ждём загрузки
+
+    const exists = directions.some((d) => d.id === routeDirId);
+    if (!exists) {
+      toast({
+        title: "Test topilmadi",
+        description: "Bunday test mavjud emas. Ro'yxatga qaytarildi.",
+        variant: "destructive",
+      });
+      navigate("/test", { replace: true });
+      return;
+    }
+
+    // если уже этот же тест открыт — ничего не делаем
+    if (phase === "quiz" && selectedDir === routeDirId) return;
+    if (phase === "result" && selectedDir === routeDirId) return;
+
+    startDirection(routeDirId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [routeDirId, directions.length, navigate, toast]);
+
+  // ✅ NEW: при выборе теста из списка — меняем URL на /test/:id
+  const startDirectionAndPushUrl = (directionId: string) => {
+    navigate(`/test/${directionId}`);
   };
 
   const handleNext = async () => {
@@ -105,19 +148,24 @@ export default function Quiz() {
       <div className="container py-8">
         <h1 className="mb-2 text-3xl font-bold">O'zingni sinab ko'r</h1>
         <p className="mb-8 text-muted-foreground">Yo'nalishni tanlang va bilimingizni tekshiring</p>
+
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {directions.map((direction) => (
             <Card
               key={direction.id}
               className="group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1"
-              onClick={() => startDirection(direction.id)}
+              onClick={() => startDirectionAndPushUrl(direction.id)}
             >
               <CardContent className="p-6 text-center">
                 <div className="mx-auto mb-4 text-5xl">{direction.icon}</div>
                 <h3 className="mb-2 text-xl font-semibold">{direction.name}</h3>
                 <p className="mb-4 text-sm text-muted-foreground">{direction.description}</p>
+
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">{direction.questionCount || 0} ta savol</span>
+                  <span className="text-xs text-muted-foreground">
+                    {direction.questionCount || 0} ta savol
+                  </span>
+
                   <button
                     onClick={async (event) => {
                       event.stopPropagation();
@@ -132,11 +180,21 @@ export default function Quiz() {
                       }
                     }}
                     className="text-muted-foreground hover:text-yellow-500"
+                    type="button"
                   >
-                    <Star className={`h-4 w-4 ${favoriteTests.includes(direction.id) ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                    <Star
+                      className={`h-4 w-4 ${
+                        favoriteTests.includes(direction.id) ? "fill-yellow-400 text-yellow-400" : ""
+                      }`}
+                    />
                   </button>
                 </div>
-                {direction.status === "ARCHIVED" && <Badge variant="secondary" className="mt-3">Arxiv</Badge>}
+
+                {direction.status === "ARCHIVED" && (
+                  <Badge variant="secondary" className="mt-3">
+                    Arxiv
+                  </Badge>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -153,15 +211,24 @@ export default function Quiz() {
       <div className="container max-w-2xl py-8">
         <div className="mb-6 flex items-center justify-between text-sm">
           <span className="font-medium">{selectedDirection?.name}</span>
-          <span className="text-muted-foreground">{currentQ + 1} / {questions.length}</span>
+          <span className="text-muted-foreground">
+            {currentQ + 1} / {questions.length}
+          </span>
         </div>
+
         <div className="mb-8 h-2 w-full rounded-full bg-muted">
-          <div className="h-2 rounded-full bg-accent transition-all" style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }} />
+          <div
+            className="h-2 rounded-full bg-accent transition-all"
+            style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }}
+          />
         </div>
 
         <Card>
           <CardContent className="p-6 md:p-8 space-y-6">
-            <h2 className="text-lg font-semibold whitespace-pre-line">{currentQuestion.questionText}</h2>
+            <h2 className="text-lg font-semibold whitespace-pre-line">
+              {currentQuestion.questionText}
+            </h2>
+
             {currentQuestion.imagePath && (
               <div className="flex justify-center">
                 <img
@@ -172,16 +239,28 @@ export default function Quiz() {
                 />
               </div>
             )}
+
             <RadioGroup
               key={currentQuestion.id}
               value={selectedAnswer !== undefined ? selectedAnswer.toString() : ""}
-              onValueChange={(value) => setAnswers((prev) => ({ ...prev, [currentQuestion.id]: Number(value) }))}
+              onValueChange={(value) =>
+                setAnswers((prev) => ({ ...prev, [currentQuestion.id]: Number(value) }))
+              }
             >
               <div className="space-y-3">
                 {(currentQuestion.options || []).map((option, index) => (
-                  <label key={index} className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:border-accent">
-                    <RadioGroupItem value={index.toString()} id={`opt-${currentQuestion.id}-${index}`} />
-                    <Label htmlFor={`opt-${currentQuestion.id}-${index}`} className="flex-1 cursor-pointer text-base">
+                  <label
+                    key={index}
+                    className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer hover:border-accent"
+                  >
+                    <RadioGroupItem
+                      value={index.toString()}
+                      id={`opt-${currentQuestion.id}-${index}`}
+                    />
+                    <Label
+                      htmlFor={`opt-${currentQuestion.id}-${index}`}
+                      className="flex-1 cursor-pointer text-base"
+                    >
                       {option.type === "IMAGE" && option.imagePath ? (
                         <span className="flex items-center gap-3">
                           <img
@@ -200,6 +279,7 @@ export default function Quiz() {
                 ))}
               </div>
             </RadioGroup>
+
             <div className="text-right">
               <Button onClick={handleNext} className="gap-2" disabled={submitMutation.isPending}>
                 {isLast ? "Yakunlash" : "Keyingi savol"}
@@ -217,10 +297,21 @@ export default function Quiz() {
       <div className="container flex items-center justify-center py-20">
         <Card className="w-full max-w-xl">
           <CardContent className="p-8 text-center">
-            <Trophy className={`mx-auto mb-4 h-16 w-16 ${result.percentage >= 70 ? "text-yellow-500" : result.percentage >= 40 ? "text-accent" : "text-muted-foreground"}`} />
+            <Trophy
+              className={`mx-auto mb-4 h-16 w-16 ${
+                result.percentage >= 70
+                  ? "text-yellow-500"
+                  : result.percentage >= 40
+                    ? "text-accent"
+                    : "text-muted-foreground"
+              }`}
+            />
             <h2 className="mb-2 text-3xl font-bold">{result.percentage}%</h2>
             <p className="mb-1 text-lg font-medium">{result.directionName}</p>
-            <p className="mb-6 text-muted-foreground">{result.score} / {result.total} ta to'g'ri javob</p>
+            <p className="mb-6 text-muted-foreground">
+              {result.score} / {result.total} ta to'g'ri javob
+            </p>
+
             <div className="space-y-2 text-left">
               {details.map((detail) => (
                 <div key={detail.questionId} className="rounded-md border p-3">
@@ -231,9 +322,25 @@ export default function Quiz() {
                 </div>
               ))}
             </div>
+
             <div className="mt-6 flex flex-col gap-3">
-              <Button onClick={() => setPhase("select")}>Boshqa test</Button>
-              <Button variant="outline" onClick={() => startDirection(selectedDir)}>Qayta urinish</Button>
+              {/* ✅ лучше: вернуться к списку тестов */}
+              <Button
+                onClick={() => {
+                  setPhase("select");
+                  navigate("/test", { replace: false });
+                }}
+              >
+                Boshqa test
+              </Button>
+
+              {/* ✅ повтор — остаёмся на /test/:id */}
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/test/${selectedDir}`, { replace: false })}
+              >
+                Qayta urinish
+              </Button>
             </div>
           </CardContent>
         </Card>

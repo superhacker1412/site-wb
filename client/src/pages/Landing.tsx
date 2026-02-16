@@ -2,7 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
-  BookOpen,
   Brain,
   CheckCircle2,
   Clock3,
@@ -119,7 +118,11 @@ export default function Landing() {
                   </Button>
                 </Link>
                 <Link to="/test">
-                  <Button size="lg" variant="outline" className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+                  >
                     Testni boshlash
                   </Button>
                 </Link>
@@ -134,9 +137,16 @@ export default function Landing() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-white/90">
-                <div className="rounded-lg border border-white/20 bg-white/5 p-3">Bola savolga shoshilmasdan, mantiq bilan javob berishni o'rganadi.</div>
-                <div className="rounded-lg border border-white/20 bg-white/5 p-3">Yechilgan testlar orqali o'sish dinamikasi ko'rinadi.</div>
-                <div className="rounded-lg border border-white/20 bg-white/5 p-3">Ota-ona bolaning qaysi yo'nalishda kuchli ekanini aniq ko'radi.</div>
+                <div className="rounded-lg border border-white/20 bg-white/5 p-3">
+                  Bola savolga shoshilmasdan, mantiq bilan javob berishni o'rganadi.
+                </div>
+                <div className="rounded-lg border border-white/20 bg-white/5 p-3">
+                  Yechilgan testlar orqali o'sish dinamikasi ko'rinadi.
+                </div>
+                <div className="rounded-lg border border-white/20 bg-white/5 p-3">
+                  Ota-ona bolaning qaysi yo'nalishda kuchli ekanini aniq ko'radi.
+                </div>
+
                 <div className="grid grid-cols-3 gap-2 pt-1 text-center">
                   <div className="rounded-md bg-white/10 p-2">
                     <p className="text-xl font-bold">{categories.length}</p>
@@ -180,7 +190,9 @@ export default function Landing() {
         <div className="mb-6 flex items-center justify-between" data-aos="fade-up">
           <div>
             <h2 className="text-3xl font-bold">Yo'nalishlar va mavzular</h2>
-            <p className="text-muted-foreground">Bolaga qiziqarli bo'lgan yo'nalishni tanlang va bosqichma-bosqich rivojlaning.</p>
+            <p className="text-muted-foreground">
+              Bolaga qiziqarli bo'lgan yo'nalishni tanlang va bosqichma-bosqich rivojlaning.
+            </p>
           </div>
           <Link to="/materiallar" className="hidden md:block">
             <Button variant="outline" className="gap-2">
@@ -192,14 +204,21 @@ export default function Landing() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((category, index) => (
-            <Link key={category.id} to={`/materiallar?category=${category.id}`} data-aos="fade-up" data-aos-delay={index * 60}>
+            <Link
+              key={category.id}
+              to={`/materiallar?category=${category.id}`}
+              data-aos="fade-up"
+              data-aos-delay={index * 60}
+            >
               <Card className="h-full border-primary/10 transition-all hover:-translate-y-1 hover:shadow-lg">
                 <CardContent className="space-y-2 p-5">
                   <div className="flex items-center gap-3">
                     <div className="text-2xl">{category.icon}</div>
                     <h3 className="font-semibold">{category.name}</h3>
                   </div>
-                  <p className="text-sm text-muted-foreground">Bu yo'nalishda bolangiz mantiqiy fikrlashni mustahkamlaydi.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Bu yo'nalishda bolangiz mantiqiy fikrlashni mustahkamlaydi.
+                  </p>
                   {category.status === "ARCHIVED" ? <Badge variant="secondary">Arxiv</Badge> : null}
                 </CardContent>
               </Card>
@@ -219,7 +238,12 @@ export default function Landing() {
             </CardHeader>
             <CardContent className="space-y-4">
               {processSteps.map((step, index) => (
-                <div key={step.title} className="rounded-lg border p-3" data-aos="fade-up" data-aos-delay={index * 80}>
+                <div
+                  key={step.title}
+                  className="rounded-lg border p-3"
+                  data-aos="fade-up"
+                  data-aos-delay={index * 80}
+                >
                   <p className="font-semibold">{step.title}</p>
                   <p className="text-sm text-muted-foreground">{step.text}</p>
                 </div>
@@ -235,10 +259,19 @@ export default function Landing() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               {materials.slice(0, 4).map((material, index) => (
-                <Link key={material.id} to={`/materiallar/${material.id}`} data-aos="zoom-in" data-aos-delay={index * 90}>
+                <Link
+                  key={material.id}
+                  to={`/materiallar/${material.id}`}
+                  data-aos="zoom-in"
+                  data-aos-delay={index * 90}
+                >
                   <Card className="h-full overflow-hidden">
                     {material.imagePath ? (
-                      <img src={toAssetUrl(material.imagePath)} alt={material.title} className="aspect-video w-full object-cover" />
+                      <img
+                        src={toAssetUrl(material.imagePath)}
+                        alt={material.title}
+                        className="aspect-video w-full object-cover"
+                      />
                     ) : null}
                     <CardContent className="space-y-1 p-3">
                       <p className="line-clamp-1 font-semibold">{material.title}</p>
@@ -255,12 +288,19 @@ export default function Landing() {
       <section className="container mt-14">
         <div className="mb-6" data-aos="fade-up">
           <h2 className="text-3xl font-bold">Test yo'nalishlari</h2>
-          <p className="text-muted-foreground">Bola turli yo'nalishlarda o'zini tekshiradi va qaysi mavzuda kuchli ekanini ko'radi.</p>
+          <p className="text-muted-foreground">
+            Bola turli yo'nalishlarda o'zini tekshiradi va qaysi mavzuda kuchli ekanini ko'radi.
+          </p>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {directions.map((direction, index) => (
-            <Link key={direction.id} to="/test" data-aos="fade-up" data-aos-delay={index * 70}>
+            <Link
+              key={direction.id}
+              to={`/test/${direction.id}`} // ✅ FIX: было "/test"
+              data-aos="fade-up"
+              data-aos-delay={index * 70}
+            >
               <Card className="h-full transition-all hover:-translate-y-1 hover:shadow-lg">
                 <CardContent className="space-y-2 p-5">
                   <div className="text-3xl">{direction.icon}</div>

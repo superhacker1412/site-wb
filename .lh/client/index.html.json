@@ -1,0 +1,34 @@
+{
+    "sourceFile": "client/index.html",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 4,
+            "patches": [
+                {
+                    "date": 1771244814585,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1771244819616,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -3,9 +3,9 @@\n   <head>\r\n     <meta charset=\"UTF-8\" />\r\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n     <!-- TODO: Set the document title to the name of your application -->\r\n-    <title>Bolalarni </title>\r\n+    <title>Bolalarni mantiqiy </title>\r\n     <meta name=\"description\" content=\"Lovable Generated Project\" />\r\n     <meta name=\"author\" content=\"Lovable\" />\r\n \r\n     <!-- TODO: Update og:title to match your application name -->\r\n"
+                },
+                {
+                    "date": 1771244828905,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -3,9 +3,9 @@\n   <head>\r\n     <meta charset=\"UTF-8\" />\r\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n     <!-- TODO: Set the document title to the name of your application -->\r\n-    <title>Bolalarni mantiqiy </title>\r\n+    <title>Bolalarni mantiqiy va tanqidiy rivojlantirish</title>\r\n     <meta name=\"description\" content=\"Lovable Generated Project\" />\r\n     <meta name=\"author\" content=\"Lovable\" />\r\n \r\n     <!-- TODO: Update og:title to match your application name -->\r\n"
+                },
+                {
+                    "date": 1771244838631,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -4,14 +4,14 @@\n     <meta charset=\"UTF-8\" />\r\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n     <!-- TODO: Set the document title to the name of your application -->\r\n     <title>Bolalarni mantiqiy va tanqidiy rivojlantirish</title>\r\n-    <meta name=\"description\" content=\"Lovable Generated Project\" />\r\n+    <meta name=\"description\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta name=\"author\" content=\"Lovable\" />\r\n \r\n     <!-- TODO: Update og:title to match your application name -->\r\n     <meta property=\"og:title\" content=\"Lovable App\" />\r\n-    <meta property=\"og:description\" content=\"Lovable Generated Project\" />\r\n+    <meta property=\"og:description\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta property=\"og:type\" content=\"website\" />\r\n     <meta property=\"og:image\" content=\"https://lovable.dev/opengraph-image-p98pqg.png\" />\r\n \r\n     <meta name=\"twitter:card\" content=\"summary_large_image\" />\r\n"
+                },
+                {
+                    "date": 1771244848071,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -5,12 +5,12 @@\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n     <!-- TODO: Set the document title to the name of your application -->\r\n     <title>Bolalarni mantiqiy va tanqidiy rivojlantirish</title>\r\n     <meta name=\"description\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n-    <meta name=\"author\" content=\"Lovable\" />\r\n+    <meta name=\"author\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n \r\n     <!-- TODO: Update og:title to match your application name -->\r\n-    <meta property=\"og:title\" content=\"Lovable App\" />\r\n+    <meta property=\"og:title\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta property=\"og:description\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta property=\"og:type\" content=\"website\" />\r\n     <meta property=\"og:image\" content=\"https://lovable.dev/opengraph-image-p98pqg.png\" />\r\n \r\n"
+                }
+            ],
+            "date": 1771244814585,
+            "name": "Commit-0",
+            "content": "<!doctype html>\r\n<html lang=\"en\">\r\n  <head>\r\n    <meta charset=\"UTF-8\" />\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n    <!-- TODO: Set the document title to the name of your application -->\r\n    <title>Bolalarni </title>\r\n    <meta name=\"description\" content=\"Lovable Generated Project\" />\r\n    <meta name=\"author\" content=\"Lovable\" />\r\n\r\n    <!-- TODO: Update og:title to match your application name -->\r\n    <meta property=\"og:title\" content=\"Lovable App\" />\r\n    <meta property=\"og:description\" content=\"Lovable Generated Project\" />\r\n    <meta property=\"og:type\" content=\"website\" />\r\n    <meta property=\"og:image\" content=\"https://lovable.dev/opengraph-image-p98pqg.png\" />\r\n\r\n    <meta name=\"twitter:card\" content=\"summary_large_image\" />\r\n    <meta name=\"twitter:site\" content=\"@Lovable\" />\r\n    <meta name=\"twitter:image\" content=\"https://lovable.dev/opengraph-image-p98pqg.png\" />\r\n  </head>\r\n\r\n  <body>\r\n    <div id=\"root\"></div>\r\n    <script type=\"module\" src=\"/src/main.tsx\"></script>\r\n  </body>\r\n</html>\r\n"
+        }
+    ]
+}
