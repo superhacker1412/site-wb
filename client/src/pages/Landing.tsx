@@ -96,13 +96,13 @@ export default function Landing() {
             <div className="space-y-6" data-aos="fade-right">
               <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm">
                 <Sparkles className="h-4 w-4" />
-                Farzandingiz fikrlashini bugundan kuchaytiring
+                 Uzingizning mantiqiy va tanqidiy fikrlashingizni rivojlantring
               </div>
 
               <h1 className="text-4xl font-extrabold leading-tight md:text-6xl">
-                IQ Bolalar
-                <span className="block text-cyan-300">aqlli avlod uchun</span>
-                zamonaviy platforma
+                Umum talim maktablarida oquvchilarning
+                <span className="block text-cyan-300"> mantiqiy va tanqidiy fikrlashini</span>
+                rivojlantirish uchun zamonaviy platforma
               </h1>
 
               <p className="max-w-2xl text-base text-primary-foreground/85 md:text-lg">

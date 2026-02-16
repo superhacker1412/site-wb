@@ -31,8 +31,10 @@ type SidebarLinkItem = NavLinkItem & {
 
 const navLinks: NavLinkItem[] = [
   { to: "/", label: "Bosh sahifa" },
-  { to: "/materiallar", label: "Materiallar", startsWith: "/materiallar" },
+  { to: "/test/cmlp60o1200049ba0h0afbnk5", label: "Kirish testi", startsWith: "/test/cmlp60o1200049ba0h0afbnk5" },
   { to: "/test", label: "Testlar", startsWith: "/test" },
+  { to: "/test/cmlp64mej00079ba007o950h2", label: "Chiqish testi", startsWith: "/test/cmlp64mej00079ba007o950h2" },
+  { to: "/materiallar", label: "Materiallar", startsWith: "/materiallar" },
   { to: "/o-nas", label: "O'zimiz haqida", startsWith: "/o-nas" },
 ];
 
@@ -107,7 +109,7 @@ export default function Header() {
 
           <Link to="/" className="flex items-center gap-2 font-bold text-lg">
             <Brain className="h-7 w-7 text-accent" />
-            <span className="hidden sm:inline font-['Space_Grotesk'] text-primary">IQ Bolalar</span>
+            <span className="hidden sm:inline font-['Space_Grotesk'] text-primary">Bolalarni mantiqiy va tanqidiy rijovlantrish</span>
           </Link>
         </div>
 
