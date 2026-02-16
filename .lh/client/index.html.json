@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 4,
+            "activePatchIndex": 5,
             "patches": [
                 {
                     "date": 1771244814585,
@@ -24,6 +24,10 @@
                 {
                     "date": 1771244848071,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -5,12 +5,12 @@\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n     <!-- TODO: Set the document title to the name of your application -->\r\n     <title>Bolalarni mantiqiy va tanqidiy rivojlantirish</title>\r\n     <meta name=\"description\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n-    <meta name=\"author\" content=\"Lovable\" />\r\n+    <meta name=\"author\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n \r\n     <!-- TODO: Update og:title to match your application name -->\r\n-    <meta property=\"og:title\" content=\"Lovable App\" />\r\n+    <meta property=\"og:title\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta property=\"og:description\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta property=\"og:type\" content=\"website\" />\r\n     <meta property=\"og:image\" content=\"https://lovable.dev/opengraph-image-p98pqg.png\" />\r\n \r\n"
+                },
+                {
+                    "date": 1771248069065,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -2,21 +2,24 @@\n <html lang=\"en\">\r\n   <head>\r\n     <meta charset=\"UTF-8\" />\r\n     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n-    <!-- TODO: Set the document title to the name of your application -->\r\n+\r\n     <title>Bolalarni mantiqiy va tanqidiy rivojlantirish</title>\r\n     <meta name=\"description\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta name=\"author\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n \r\n-    <!-- TODO: Update og:title to match your application name -->\r\n+    <!-- ✅ Favicon -->\r\n+    <link rel=\"icon\" type=\"image/svg+xml\" href=\"/favicon.svg\" />\r\n+    <link rel=\"alternate icon\" href=\"/favicon.ico\" />\r\n+\r\n     <meta property=\"og:title\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta property=\"og:description\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta property=\"og:type\" content=\"website\" />\r\n     <meta property=\"og:image\" content=\"https://lovable.dev/opengraph-image-p98pqg.png\" />\r\n \r\n     <meta name=\"twitter:card\" content=\"summary_large_image\" />\r\n-    <meta name=\"twitter:site\" content=\"@Lovable\" />\r\n+    <meta name=\"twitter:site\" content=\"Bolalarni mantiqiy va tanqidiy rivojlantirish\" />\r\n     <meta name=\"twitter:image\" content=\"https://lovable.dev/opengraph-image-p98pqg.png\" />\r\n   </head>\r\n \r\n   <body>\r\n"
                 }
             ],
             "date": 1771244814585,
