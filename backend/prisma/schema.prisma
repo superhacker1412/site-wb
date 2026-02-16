@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum EntityStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum QuestionType {
+  CHOICE
+  TRUE_FALSE
+  IMAGE
+}
+
+enum FeedbackStatus {
+  NEW
+  READ
+  RESOLVED
+  ARCHIVED
+}
+
+model Region {
+  id         String       @id @default(cuid())
+  soatoId    Int?         @unique
+  slug       String       @unique
+  name       String       @unique
+  status     EntityStatus @default(ACTIVE)
+  archivedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  cities     City[]
+  districts  District[]
+  users      User[]
+
+  @@index([status, name])
+}
+
+model City {
+  id         String       @id @default(cuid())
+  soatoId    Int?         @unique
+  regionId   String
+  slug       String       @unique
+  name       String
+  status     EntityStatus @default(ACTIVE)
+  archivedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  region     Region       @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  districts  District[]
+  users      User[]
+
+  @@unique([regionId, name])
+  @@index([regionId, status])
+}
+
+model District {
+  id         String       @id @default(cuid())
+  soatoId    Int?         @unique
+  regionId   String
+  cityId     String?
+  slug       String       @unique
+  name       String
+  status     EntityStatus @default(ACTIVE)
+  archivedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  region     Region       @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  city       City?        @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  schools    School[]
+  users      User[]
+
+  @@unique([regionId, cityId, name])
+  @@index([regionId, status])
+  @@index([cityId, status])
+}
+
+model School {
+  id         String       @id @default(cuid())
+  districtId String
+  slug       String       @unique
+  name       String
+  status     EntityStatus @default(ACTIVE)
+  archivedAt DateTime?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  district   District     @relation(fields: [districtId], references: [id], onDelete: Restrict)
+  users      User[]
+
+  @@unique([districtId, name])
+  @@index([districtId, status])
+}
+
+model User {
+  id                  String              @id @default(cuid())
+  name                String
+  firstName           String?
+  lastName            String?
+  middleName          String?
+  email               String              @unique
+  passwordHash        String
+  role                UserRole            @default(USER)
+  status              EntityStatus        @default(ACTIVE)
+  regionId            String?
+  cityId              String?
+  districtId          String?
+  customDistrictName  String?
+  schoolId            String?
+  customSchoolName    String?
+  gradeNumber         Int?
+  gradeLetter         String?
+  archivedAt          DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  region              Region?             @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  city                City?               @relation(fields: [cityId], references: [id], onDelete: SetNull)
+  district            District?           @relation(fields: [districtId], references: [id], onDelete: SetNull)
+  school              School?             @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  refreshTokens       RefreshToken[]
+  quizAttempts        QuizAttempt[]
+  favoriteMaterials   FavoriteMaterial[]
+  favoriteDirections  FavoriteDirection[]
+  adminAuditLogs      AdminAuditLog[]     @relation("AdminAuditLogs")
+  createdMaterials    Material[]          @relation("MaterialCreatedBy")
+  updatedMaterials    Material[]          @relation("MaterialUpdatedBy")
+  reviewedFeedback    FeedbackMessage[]   @relation("FeedbackReviewedBy")
+  updatedSiteSettings SiteSettings[]     @relation("SiteSettingsUpdatedBy")
+
+  @@index([regionId])
+  @@index([cityId])
+  @@index([districtId])
+  @@index([schoolId])
+  @@index([gradeNumber])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ip        String?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Category {
+  id        String       @id @default(cuid())
+  slug      String       @unique
+  name      String
+  icon      String
+  color     String
+  status    EntityStatus @default(ACTIVE)
+  archivedAt DateTime?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  materials Material[]
+}
+
+model Material {
+  id          String          @id @default(cuid())
+  categoryId  String
+  title       String
+  description String
+  imagePath   String?
+  contentHtml String          @db.Text
+  status      EntityStatus    @default(ACTIVE)
+  archivedAt  DateTime?
+  createdById String?
+  updatedById String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  category    Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdBy   User?           @relation("MaterialCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy   User?           @relation("MaterialUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  favorites   FavoriteMaterial[]
+
+  @@index([categoryId])
+  @@index([status])
+}
+
+model QuizDirection {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  icon        String
+  description String
+  status      EntityStatus      @default(ACTIVE)
+  archivedAt  DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  questions   QuizQuestion[]
+  attempts    QuizAttempt[]
+  favorites   FavoriteDirection[]
+
+  @@index([status])
+}
+
+model QuizQuestion {
+  id                 String       @id @default(cuid())
+  directionId        String
+  type               QuestionType
+  questionText       String       @db.Text
+  optionsJson        Json?
+  imagePath          String?
+  correctAnswerIndex Int
+  explanationHtml    String       @db.Text
+  orderIndex         Int
+  status             EntityStatus @default(ACTIVE)
+  archivedAt         DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  direction          QuizDirection @relation(fields: [directionId], references: [id], onDelete: Cascade)
+  answers            QuizAnswer[]
+
+  @@unique([directionId, orderIndex])
+  @@index([directionId, status])
+}
+
+model QuizAttempt {
+  id         String        @id @default(cuid())
+  userId     String
+  directionId String
+  score      Int
+  total      Int
+  percentage Int
+  submittedAt DateTime     @default(now())
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  direction  QuizDirection @relation(fields: [directionId], references: [id], onDelete: Restrict)
+  answers    QuizAnswer[]
+
+  @@index([userId, submittedAt])
+  @@index([directionId, submittedAt])
+}
+
+model QuizAnswer {
+  id                  String      @id @default(cuid())
+  attemptId           String
+  questionId          String
+  selectedAnswerIndex Int
+  isCorrect           Boolean
+  attempt             QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question            QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([attemptId, questionId])
+}
+
+model FavoriteMaterial {
+  userId     String
+  materialId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@id([userId, materialId])
+  @@index([materialId])
+}
+
+model FavoriteDirection {
+  userId      String
+  directionId String
+  createdAt   DateTime      @default(now())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  direction   QuizDirection @relation(fields: [directionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, directionId])
+  @@index([directionId])
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  entityType String
+  entityId   String
+  action     String
+  beforeJson Json?
+  afterJson  Json?
+  createdAt  DateTime @default(now())
+  ip         String?
+  userAgent  String?
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: Restrict)
+
+  @@index([adminId, createdAt])
+  @@index([entityType, createdAt])
+}
+
+model FeedbackMessage {
+  id           String         @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  subject      String?
+  message      String         @db.Text
+  status       FeedbackStatus @default(NEW)
+  reviewedAt   DateTime?
+  reviewedById String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  reviewedBy   User?          @relation("FeedbackReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+}
+
+model SiteSettings {
+  id               String   @id
+  aboutTitle       String
+  aboutSubtitle    String   @db.Text
+  aboutDescription String   @db.Text
+  aboutMission     String   @db.Text
+  aboutAddress     String
+  aboutPhone       String
+  aboutEmail       String
+  aboutTelegram    String?
+  aboutWorkingHours String?
+  footerBrand      String
+  footerDescription String  @db.Text
+  footerPagesTitle String
+  footerContactsTitle String
+  footerLinkHomeLabel String
+  footerLinkHomePath String
+  footerLinkMaterialsLabel String
+  footerLinkMaterialsPath String
+  footerLinkQuizLabel String
+  footerLinkQuizPath String
+  footerLinkAboutLabel String
+  footerLinkAboutPath String
+  footerAddress    String
+  footerPhone      String
+  footerEmail      String
+  footerTelegram   String?
+  footerWorkingHours String?
+  footerCopyright  String
+  updatedById      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  updatedBy        User?    @relation("SiteSettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+}
