@@ -235,63 +235,83 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="container mt-14">
-        <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr] lg:items-start">
-          <Card data-aos="fade-right" className="border-cyan-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Compass className="h-5 w-5 text-cyan-600" />
-                O'qish jarayoni qanday?
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {processSteps.map((step, index) => (
-                <div
-                  key={step.title}
-                  className="rounded-lg border p-3"
-                  data-aos="fade-up"
-                  data-aos-delay={index * 80}
-                >
-                  <p className="font-semibold">{step.title}</p>
-                  <p className="text-sm text-muted-foreground">{step.text}</p>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          <div className="space-y-4" data-aos="fade-left">
-            <h3 className="text-2xl font-bold">Bolaga mos amaliy kontent</h3>
-            <p className="text-muted-foreground">
-              Materiallar qisqa bloklarda beriladi. Har bir mavzudan keyin test topshirib, bola o'zini tekshiradi va nimani takrorlash kerakligini biladi.
-            </p>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              {materials.slice(0, 4).map((material, index) => (
-                <Link
-                  key={material.id}
-                  to={`/materiallar/${material.id}`}
-                  data-aos="zoom-in"
-                  data-aos-delay={index * 90}
-                >
-                  <Card className="h-full overflow-hidden">
-                    {material.imagePath ? (
-                      <img
-                        src={toAssetUrl(material.imagePath)}
-                        alt={material.title}
-                        className="aspect-video w-full object-cover"
-                      />
-                    ) : null}
-                    <CardContent className="space-y-1 p-3">
-                      <p className="line-clamp-1 font-semibold">{material.title}</p>
-                      <p className="line-clamp-2 text-xs text-muted-foreground">{material.description}</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+     <section className="container mt-14 overflow-x-clip">
+  <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr] lg:items-start">
+    {/* ✅ Mobile: fade-up, Desktop: fade-right */}
+    <Card
+      data-aos="fade-up"
+      data-aos-once="true"
+      data-aos-duration="600"
+      data-aos-anchor-placement="top-bottom"
+      className="border-cyan-200 lg:[data-aos=fade-up]:[data-aos=fade-right]"
+    >
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-sm md:text-base">
+          <Compass className="h-4 w-4 md:h-5 md:w-5 text-cyan-600" />
+          O'qish jarayoni qanday?
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {processSteps.map((step, index) => (
+          <div
+            key={step.title}
+            className="rounded-lg border p-3"
+            data-aos="fade-up"
+            data-aos-delay={index * 80}
+          >
+            <p className="font-semibold text-sm">{step.title}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">{step.text}</p>
           </div>
-        </div>
-      </section>
+        ))}
+      </CardContent>
+    </Card>
+
+    {/* ✅ Mobile: fade-up, Desktop: fade-left */}
+    <div
+      className="space-y-4"
+      data-aos="fade-up"
+      data-aos-once="true"
+      data-aos-duration="600"
+      data-aos-anchor-placement="top-bottom"
+      // трюк: на lg меняем на fade-left
+      // Tailwind arbitrary selector: применит AOS-атрибут на lg
+    >
+      {/* на lg надо сменить тип анимации */}
+      <div className="lg:[&]:[data-aos=fade-left]" />
+
+      <h3 className="text-lg md:text-xl font-bold">Bolaga mos amaliy kontent</h3>
+      <p className="text-xs md:text-sm text-muted-foreground">
+        Materiallar qisqa bloklarda beriladi. Har bir mavzudan keyin test topshirib, bola o'zini tekshiradi va nimani takrorlash kerakligini biladi.
+      </p>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {materials.slice(0, 4).map((material, index) => (
+          <Link
+            key={material.id}
+            to={`/materiallar/${material.id}`}
+            data-aos="zoom-in"
+            data-aos-delay={index * 90}
+          >
+            <Card className="h-full overflow-hidden">
+              {material.imagePath ? (
+                <img
+                  src={toAssetUrl(material.imagePath)}
+                  alt={material.title}
+                  className="aspect-video w-full object-cover"
+                />
+              ) : null}
+              <CardContent className="space-y-1 p-3">
+                <p className="line-clamp-1 font-semibold text-sm">{material.title}</p>
+                <p className="line-clamp-2 text-[11px] md:text-xs text-muted-foreground">{material.description}</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
 
       <section className="container mt-14">
         <div className="mb-6" data-aos="fade-up">
