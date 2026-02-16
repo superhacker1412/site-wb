@@ -28,13 +28,17 @@ const navLinks: NavLinkItem[] = [
 
 const sidebarLinks: SidebarLinkItem[] = [
   { to: "/", label: "Bosh sahifa", icon: Home },
-  { to: "/materiallar", label: "Materiallar", startsWith: "/materiallar", icon: BookOpen },
+
+  // ✅ same order as nav
+  { to: "/test/cmlp60o1200049ba0h0afbnk5", label: "Kirish testi", startsWith: "/test/cmlp60o1200049ba0h0afbnk5", icon: FileText },
   { to: "/test", label: "Testlar", startsWith: "/test", icon: FileText },
+  { to: "/test/cmlp64mej00079ba007o950h2", label: "Chiqish testi", startsWith: "/test/cmlp64mej00079ba007o950h2", icon: FileText },
+
+  { to: "/materiallar", label: "Materiallar", startsWith: "/materiallar", icon: BookOpen },
   { to: "/o-nas", label: "O'zimiz haqida", startsWith: "/o-nas", icon: Info },
   { to: "/kabinet", label: "Kabinet", startsWith: "/kabinet", icon: User },
   { to: "/kabinet?tab=materials", label: "Sevimlilar", startsWith: "/kabinet", icon: Star },
 ];
-
 function isActive(currentPath: string, currentSearch: string, link: NavLinkItem): boolean {
   if (link.to.includes("?")) {
     return `${currentPath}${currentSearch}` === link.to;
