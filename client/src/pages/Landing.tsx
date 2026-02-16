@@ -92,78 +92,86 @@ export default function Landing() {
         <div className="absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl" />
 
         <div className="container relative z-10 text-primary-foreground">
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
-            <div className="space-y-6" data-aos="fade-right">
-              <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-4 py-2 text-sm">
-                <Sparkles className="h-4 w-4" />
-                 Uzingizning mantiqiy va tanqidiy fikrlashingizni rivojlantring
-              </div>
+        <div className="grid gap-8 lg:gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+  <div className="space-y-4 md:space-y-5" data-aos="fade-right">
+    {/* ✅ badge text smaller */}
+    <div className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 px-3 py-1.5 text-[11px] md:text-xs leading-4">
+      <Sparkles className="h-3.5 w-3.5" />
+      Uzingizning mantiqiy va tanqidiy fikrlashingizni rivojlantring
+    </div>
 
-              <h1 className="text-4xl font-extrabold leading-tight md:text-6xl">
-                Umum talim maktablarida oquvchilarning
-                <span className="block text-cyan-300"> mantiqiy va tanqidiy fikrlashini</span>
-                rivojlantirish uchun zamonaviy platforma
-              </h1>
+    {/* ✅ title smaller */}
+    <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold leading-tight">
+      Umum talim maktablarida oquvchilarning
+      <span className="block text-cyan-300"> mantiqiy va tanqidiy fikrlashini</span>
+      rivojlantirish uchun zamonaviy platforma
+    </h1>
 
-              <p className="max-w-2xl text-base text-primary-foreground/85 md:text-lg">
-                Bu yerda bola nafaqat test yechadi, balki mantiqiy fikrlash, tahlil qilish va muammoni yechish odatini shakllantiradi.
-                Har bir mavzu oddiy tilda, misollar bilan va amaliy natija bilan beriladi.
-              </p>
+    {/* ✅ paragraph smaller */}
+    <p className="max-w-2xl text-sm md:text-base text-primary-foreground/85 leading-5 md:leading-6">
+      Bu yerda bola nafaqat test yechadi, balki mantiqiy fikrlash, tahlil qilish va muammoni yechish odatini shakllantiradi.
+      Har bir mavzu oddiy tilda, misollar bilan va amaliy natija bilan beriladi.
+    </p>
 
-              <div className="flex flex-wrap gap-3">
-                <Link to="/materiallar">
-                  <Button size="lg" className="gap-2 bg-cyan-300 text-slate-900 hover:bg-cyan-200">
-                    Materiallarni ochish
-                    <ArrowRight className="h-5 w-5" />
-                  </Button>
-                </Link>
-                <Link to="/test">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
-                  >
-                    Testni boshlash
-                  </Button>
-                </Link>
-              </div>
-            </div>
+    {/* ✅ buttons smaller height/text */}
+    <div className="flex flex-wrap gap-2">
+      <Link to="/materiallar">
+        <Button size="sm" className="gap-2 bg-cyan-300 text-slate-900 hover:bg-cyan-200 h-9 px-4 text-sm">
+          Materiallarni ochish
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </Link>
+      <Link to="/test">
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-9 px-4 text-sm border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10"
+        >
+          Testni boshlash
+        </Button>
+      </Link>
+    </div>
+  </div>
 
-            <Card className="border-white/20 bg-white/10 text-white backdrop-blur" data-aos="fade-left">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <Rocket className="h-5 w-5 text-cyan-300" />
-                  Nima o'zgaradi?
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-white/90">
-                <div className="rounded-lg border border-white/20 bg-white/5 p-3">
-                  Bola savolga shoshilmasdan, mantiq bilan javob berishni o'rganadi.
-                </div>
-                <div className="rounded-lg border border-white/20 bg-white/5 p-3">
-                  Yechilgan testlar orqali o'sish dinamikasi ko'rinadi.
-                </div>
-                <div className="rounded-lg border border-white/20 bg-white/5 p-3">
-                  Ota-ona bolaning qaysi yo'nalishda kuchli ekanini aniq ko'radi.
-                </div>
+  <Card className="border-white/20 bg-white/10 text-white backdrop-blur" data-aos="fade-left">
+    <CardHeader className="pb-3">
+      {/* ✅ card title smaller */}
+      <CardTitle className="flex items-center gap-2 text-white text-sm md:text-base">
+        <Rocket className="h-4 w-4 text-cyan-300" />
+        Nima o'zgaradi?
+      </CardTitle>
+    </CardHeader>
 
-                <div className="grid grid-cols-3 gap-2 pt-1 text-center">
-                  <div className="rounded-md bg-white/10 p-2">
-                    <p className="text-xl font-bold">{categories.length}</p>
-                    <p className="text-[11px] text-white/70">Kategoriya</p>
-                  </div>
-                  <div className="rounded-md bg-white/10 p-2">
-                    <p className="text-xl font-bold">{materialsQuery.data?.materials.length || 0}</p>
-                    <p className="text-[11px] text-white/70">Material</p>
-                  </div>
-                  <div className="rounded-md bg-white/10 p-2">
-                    <p className="text-xl font-bold">{directionsQuery.data?.directions.length || 0}</p>
-                    <p className="text-[11px] text-white/70">Yo'nalish</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+    {/* ✅ card content text smaller */}
+    <CardContent className="space-y-2 text-[11px] md:text-xs text-white/90 leading-4">
+      <div className="rounded-lg border border-white/20 bg-white/5 p-2.5">
+        Bola savolga shoshilmasdan, mantiq bilan javob berishni o'rganadi.
+      </div>
+      <div className="rounded-lg border border-white/20 bg-white/5 p-2.5">
+        Yechilgan testlar orqali o'sish dinamikasi ko'rinadi.
+      </div>
+      <div className="rounded-lg border border-white/20 bg-white/5 p-2.5">
+        Ota-ona bolaning qaysi yo'nalishda kuchli ekanini aniq ko'radi.
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 pt-1 text-center">
+        <div className="rounded-md bg-white/10 p-2">
+          <p className="text-lg md:text-xl font-bold leading-6">{categories.length}</p>
+          <p className="text-[10px] md:text-[11px] text-white/70 leading-4">Kategoriya</p>
+        </div>
+        <div className="rounded-md bg-white/10 p-2">
+          <p className="text-lg md:text-xl font-bold leading-6">{materialsQuery.data?.materials.length || 0}</p>
+          <p className="text-[10px] md:text-[11px] text-white/70 leading-4">Material</p>
+        </div>
+        <div className="rounded-md bg-white/10 p-2">
+          <p className="text-lg md:text-xl font-bold leading-6">{directionsQuery.data?.directions.length || 0}</p>
+          <p className="text-[10px] md:text-[11px] text-white/70 leading-4">Yo'nalish</p>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+</div>
+
         </div>
       </section>
 
