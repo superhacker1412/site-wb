@@ -19,9 +19,9 @@ type SidebarLinkItem = NavLinkItem & {
 
 const navLinks: NavLinkItem[] = [
   { to: "/", label: "Bosh sahifa" },
-  { to: "/test/cmlp60o1200049ba0h0afbnk5", label: "Kirish testi", startsWith: "/test/cmlp60o1200049ba0h0afbnk5" },
+  { to: "/test/cmlxak1j1004a9ba0eknhoo88", label: "Kirish testi", startsWith: "/test/cmlxak1j1004a9ba0eknhoo88" },
   { to: "/test", label: "Testlar", startsWith: "/test" },
-  { to: "/test/cmlp64mej00079ba007o950h2", label: "Chiqish testi", startsWith: "/test/cmlp64mej00079ba007o950h2" },
+  { to: "/test/cmlxakq6s004g9ba0thha07o4", label: "Chiqish testi", startsWith: "/test/cmlxakq6s004g9ba0thha07o4" },
   { to: "/materiallar", label: "Materiallar", startsWith: "/materiallar" },
   { to: "/o-nas", label: "O'zimiz haqida", startsWith: "/o-nas" },
 ];
@@ -30,9 +30,9 @@ const sidebarLinks: SidebarLinkItem[] = [
   { to: "/", label: "Bosh sahifa", icon: Home },
 
   // ✅ same order as nav
-  { to: "/test/cmlp60o1200049ba0h0afbnk5", label: "Kirish testi", startsWith: "/test/cmlp60o1200049ba0h0afbnk5", icon: FileText },
+  { to: "/test/cmlxak1j1004a9ba0eknhoo88", label: "Kirish testi", startsWith: "/test/cmlxak1j1004a9ba0eknhoo88", icon: FileText },
   { to: "/test", label: "Testlar", startsWith: "/test", icon: FileText },
-  { to: "/test/cmlp64mej00079ba007o950h2", label: "Chiqish testi", startsWith: "/test/cmlp64mej00079ba007o950h2", icon: FileText },
+  { to: "/test/cmlxakq6s004g9ba0thha07o4", label: "Chiqish testi", startsWith: "/test/cmlxakq6s004g9ba0thha07o4", icon: FileText },
 
   { to: "/materiallar", label: "Materiallar", startsWith: "/materiallar", icon: BookOpen },
   { to: "/o-nas", label: "O'zimiz haqida", startsWith: "/o-nas", icon: Info },

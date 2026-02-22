@@ -87,7 +87,13 @@ export default function Landing() {
 
   return (
     <div className="pb-20">
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-cyan-900 py-20 md:py-28">
+      <section
+        className="relative overflow-hidden bg-cover bg-center py-20 md:py-28"
+        style={{
+          backgroundImage:
+            "linear-gradient(to bottom right, rgba(15, 23, 42, 0.85), rgba(8, 47, 73, 0.75)), url('/bg.jpg')",
+        }}
+      >
         <div className="absolute -left-24 top-10 h-72 w-72 rounded-full bg-cyan-300/20 blur-3xl" />
         <div className="absolute -right-24 bottom-10 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl" />
 

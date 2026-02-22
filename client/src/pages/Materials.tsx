@@ -78,19 +78,7 @@ export default function Materials() {
               <CardTitle className="text-base">Kategoriyalar</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 p-3">
-              <button
-                type="button"
-                onClick={() => setCategory("")}
-                className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
-                  activeCategory === ""
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                <BookOpen className="h-4 w-4" />
-                Hammasi
-              </button>
+             
 
               {categories.map((category) => {
                 const active = activeCategory === category.id;
@@ -111,6 +99,19 @@ export default function Materials() {
                   </button>
                 );
               })}
+               <button
+                type="button"
+                onClick={() => setCategory("")}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
+                  activeCategory === ""
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <BookOpen className="h-4 w-4" />
+                Hammasi
+              </button>
             </CardContent>
           </Card>
         </aside>
