@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { BookOpen, Search, Star } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -13,9 +13,11 @@ import { Category, Material } from "@/types/api";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
+const ALL_CATEGORIES = "all";
+
 export default function Materials() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeCategory = searchParams.get("category") || "";
+  const categoryParam = searchParams.get("category") || "";
   const [search, setSearch] = useState("");
   const { favoriteMaterials, toggleFavoriteMaterial } = useAuth();
   const { toast } = useToast();
@@ -25,8 +27,25 @@ export default function Materials() {
     queryFn: () => apiFetch<{ categories: Category[] }>("/categories"),
   });
 
+  const categories = categoriesQuery.data?.categories || [];
+  const isCategoriesReady = categoriesQuery.isSuccess;
+  const firstCategoryId = categories[0]?.id || "";
+  const isAllSelected = categoryParam === ALL_CATEGORIES;
+  const isValidCategoryParam = categories.some((category) => category.id === categoryParam);
+  const needsFirstCategorySelection =
+    isCategoriesReady && categories.length > 0 && !isAllSelected && !isValidCategoryParam;
+  const activeCategory = isAllSelected ? "" : isValidCategoryParam ? categoryParam : "";
+
+  useEffect(() => {
+    if (!needsFirstCategorySelection || !firstCategoryId) return;
+    const params = new URLSearchParams(searchParams);
+    params.set("category", firstCategoryId);
+    setSearchParams(params, { replace: true });
+  }, [needsFirstCategorySelection, firstCategoryId, searchParams, setSearchParams]);
+
   const materialsQuery = useQuery({
     queryKey: ["materials", activeCategory, search],
+    enabled: isCategoriesReady && !needsFirstCategorySelection,
     queryFn: () => {
       const params = new URLSearchParams();
       if (activeCategory) params.set("category", activeCategory);
@@ -35,8 +54,7 @@ export default function Materials() {
     },
   });
 
-  const categories = categoriesQuery.data?.categories || [];
-  const materials = materialsQuery.data?.materials || [];
+  const materials = needsFirstCategorySelection ? [] : materialsQuery.data?.materials || [];
 
   const categoryMap = useMemo(
     () => new Map(categories.map((category) => [category.id, category])),
@@ -58,7 +76,13 @@ export default function Materials() {
       <p className="mb-8 text-muted-foreground" data-aos="fade-up" data-aos-delay="70">O'quv materiallari va qiziqarli maqolalar</p>
 
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden" data-aos="fade-up" data-aos-delay="110">
-        <Button variant={activeCategory === "" ? "default" : "outline"} size="sm" onClick={() => setCategory("")}>Hammasi</Button>
+        <Button
+          variant={categoryParam === ALL_CATEGORIES ? "default" : "outline"}
+          size="sm"
+          onClick={() => setCategory(ALL_CATEGORIES)}
+        >
+          Hammasi
+        </Button>
         {categories.map((category) => (
           <Button
             key={category.id}
@@ -99,12 +123,12 @@ export default function Materials() {
                   </button>
                 );
               })}
-               <button
+              <button
                 type="button"
-                onClick={() => setCategory("")}
+                onClick={() => setCategory(ALL_CATEGORIES)}
                 className={cn(
                   "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
-                  activeCategory === ""
+                  categoryParam === ALL_CATEGORIES
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
