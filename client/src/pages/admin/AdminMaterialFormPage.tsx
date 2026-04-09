@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
@@ -38,6 +38,9 @@ export default function AdminMaterialFormPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
+  const [docUploading, setDocUploading] = useState(false);
+  const docInputRef = useRef<HTMLInputElement | null>(null);
+  const selectedDocRef = useRef<File | null>(null);
   const [form, setForm] = useState<MaterialFormState>({
     id: "",
     categoryId: "",
@@ -76,7 +79,7 @@ export default function AdminMaterialFormPage() {
   const onSubmit = async () => {
     try {
       setSaving(true);
-      await apiFetch(isEdit ? `/admin/materials/${id}` : "/admin/materials", {
+      const response = await apiFetch<{ material: AdminMaterial }>(isEdit ? `/admin/materials/${id}` : "/admin/materials", {
         method: isEdit ? "PATCH" : "POST",
         body: {
           ...(isEdit ? {} : { id: form.id || undefined }),
@@ -88,6 +91,19 @@ export default function AdminMaterialFormPage() {
           status: form.status,
         },
       });
+
+      const materialId = isEdit ? (id as string) : response.material.id;
+      const selectedDoc = selectedDocRef.current;
+      if (selectedDoc) {
+        setDocUploading(true);
+        const formData = new FormData();
+        formData.append("file", selectedDoc);
+        await apiFetch(`/admin/materials/${materialId}/source-doc`, {
+          method: "POST",
+          body: formData,
+        });
+      }
+
       toast({ title: isEdit ? "Material yangilandi" : "Material yaratildi" });
       navigate("/admin/materials");
     } catch (error) {
@@ -98,6 +114,7 @@ export default function AdminMaterialFormPage() {
       });
     } finally {
       setSaving(false);
+      setDocUploading(false);
     }
   };
 
@@ -153,6 +170,22 @@ export default function AdminMaterialFormPage() {
           </div>
 
           <div className="space-y-2">
+            <Label>Word fayl (.docx)</Label>
+            <Input
+              ref={docInputRef}
+              type="file"
+              accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={(event) => {
+                const file = event.target.files?.[0] || null;
+                selectedDocRef.current = file;
+              }}
+            />
+            <div className="text-sm text-muted-foreground">
+              Agar DOCX tanlasangiz, material kontenti avtomatik import qilinadi (rasmlar ham).
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Label>Kontent (HTML)</Label>
             <RichTextEditor value={form.contentHtml} onChange={(contentHtml) => setForm((prev) => ({ ...prev, contentHtml }))} />
           </div>
@@ -171,8 +204,8 @@ export default function AdminMaterialFormPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={onSubmit} disabled={saving}>
-              {saving ? "Saqlanmoqda..." : isEdit ? "Yangilash" : "Yaratish"}
+            <Button onClick={onSubmit} disabled={saving || docUploading}>
+              {saving || docUploading ? "Saqlanmoqda..." : isEdit ? "Yangilash" : "Yaratish"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/admin/materials")}>
               Bekor qilish

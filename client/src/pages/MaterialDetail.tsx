@@ -97,7 +97,10 @@ export default function MaterialDetail() {
         </div>
 
         <h1 className="mb-6 text-3xl font-bold md:text-4xl">{material.title}</h1>
-        <div className="prose max-w-none prose-img:my-4" dangerouslySetInnerHTML={{ __html: normalizedContentHtml }} />
+        <div
+          className="prose max-w-none prose-img:my-4 prose-table:w-full prose-table:table-auto prose-td:align-top prose-th:align-top"
+          dangerouslySetInnerHTML={{ __html: normalizedContentHtml }}
+        />
       </article>
 
       <div className="mt-12 flex justify-between border-t pt-6">

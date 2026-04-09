@@ -179,6 +179,10 @@ model Material {
   description String
   imagePath   String?
   contentHtml String          @db.Text
+  sourceDocPath         String?
+  sourceDocOriginalName String?
+  sourceDocMimeType     String?
+  sourceDocUpdatedAt    DateTime?
   status      EntityStatus    @default(ACTIVE)
   archivedAt  DateTime?
   createdById String?

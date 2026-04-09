@@ -77,6 +77,10 @@ export interface Material {
   description: string;
   imagePath: string | null;
   contentHtml: string;
+  sourceDocPath?: string | null;
+  sourceDocOriginalName?: string | null;
+  sourceDocMimeType?: string | null;
+  sourceDocUpdatedAt?: string | null;
   status: EntityStatus;
   archivedAt: string | null;
   createdAt: string;

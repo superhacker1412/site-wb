@@ -1,0 +1,17 @@
+**/node_modules/
+
+## OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+## Logs
+*.log
+
+## Build outputs (common)
+**/dist/
+**/build/
+**/.turbo/
+**/.next/
+
