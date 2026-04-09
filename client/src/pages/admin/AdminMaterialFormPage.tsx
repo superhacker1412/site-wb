@@ -235,12 +235,39 @@ export default function AdminMaterialFormPage() {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, "text/html");
 
+    const normalizeWordImgSrc = (src: string): string => {
+      let s = (src || "").trim();
+      if (!s) return "";
+      s = s.replace(/\\/g, "/");
+      // Strip query/hash
+      s = s.split("#")[0]?.split("?")[0] || s;
+      // Remove leading "./"
+      s = s.replace(/^\.\//, "");
+      // Some exports may include file:///
+      s = s.replace(/^file:\/\/\/+/i, "");
+      // Decode URI-encoded paths if possible
+      try {
+        s = decodeURIComponent(s);
+      } catch {
+        // ignore
+      }
+      return s;
+    };
+
     const fileMap = new Map<string, File>();
+    const fileMapLower = new Map<string, File>();
+    const fileByBaseLower = new Map<string, File>();
     Array.from(folderFiles).forEach((f) => {
       // When selecting a directory, browsers provide webkitRelativePath.
       const rel = (f as any).webkitRelativePath as string | undefined;
-      if (rel) fileMap.set(rel.replace(/\\\\/g, "/"), f);
+      if (rel) {
+        const normalizedRel = rel.replace(/\\/g, "/");
+        fileMap.set(normalizedRel, f);
+        fileMapLower.set(normalizedRel.toLowerCase(), f);
+      }
       fileMap.set(f.name, f);
+      fileMapLower.set(f.name.toLowerCase(), f);
+      fileByBaseLower.set(f.name.toLowerCase(), f);
     });
 
     const imgs = Array.from(doc.querySelectorAll("img"));
@@ -250,18 +277,27 @@ export default function AdminMaterialFormPage() {
 
     let uploaded = 0;
     for (const img of imgs) {
-      const src = img.getAttribute("src") || "";
+      const srcRaw = img.getAttribute("src") || "";
+      const src = normalizeWordImgSrc(srcRaw);
       if (!src || /^https?:\/\//i.test(src) || src.startsWith("data:") || src.startsWith("/uploads/")) {
         continue;
       }
 
       // Word exports like "1-Dars.files/image001.jpg". Try exact match, then basename.
-      const normalized = src.replace(/\\\\/g, "/");
+      const normalized = src.replace(/\\/g, "/");
+      const normalizedLower = normalized.toLowerCase();
       const basename = normalized.split("/").pop() || normalized;
+      const basenameLower = basename.toLowerCase();
       const file =
         fileMap.get(normalized) ||
+        fileMapLower.get(normalizedLower) ||
         fileMap.get(basename) ||
-        Array.from(folderFiles).find((f) => ((f as any).webkitRelativePath as string | undefined)?.endsWith("/" + basename)) ||
+        fileMapLower.get(basenameLower) ||
+        fileByBaseLower.get(basenameLower) ||
+        Array.from(folderFiles).find((f) => {
+          const rel = ((f as any).webkitRelativePath as string | undefined) || "";
+          return rel.replace(/\\/g, "/").toLowerCase().endsWith("/" + basenameLower);
+        }) ||
         null;
 
       if (!file) continue;
@@ -522,9 +558,27 @@ export default function AdminMaterialFormPage() {
                     setDocUploadedImagesCount(0);
                     setDocImagesTotal(0);
                     setDocProgressText("HTM import boshlanmoqda...");
-                    const html = await importWordHtm(selectedHtmFile, selectedHtmFolderFiles);
-                    const improved = improveImportedHtmlLayout(html);
+                    const formData = new FormData();
+                    formData.append("htm", selectedHtmFile);
+                    Array.from(selectedHtmFolderFiles).forEach((file) => {
+                      formData.append("assets", file, file.name);
+                    });
+
+                    setDocProgressText("Serverda qayta ishlanmoqda (HTM + rasmlar)...");
+                    const response = await apiFetch<{ html: string; images: { totalInHtml: number; assetsProvided: number; assetsSaved: number; replaced: number } }>(
+                      "/admin/word-htm/import",
+                      {
+                        method: "POST",
+                        body: formData,
+                      },
+                    );
+                    setDocImagesTotal(response.images.totalInHtml);
+                    setDocUploadedImagesCount(response.images.replaced);
+                    const improved = improveImportedHtmlLayout(response.html || "<p></p>");
                     setForm((prev) => ({ ...prev, contentHtml: improved }));
+                    setDocLastSummary(
+                      `HTM import tugadi. Rasmlar: ${response.images.replaced}/${response.images.totalInHtml} (saqlandi: ${response.images.assetsSaved})`,
+                    );
                     toast({ title: "HTM import qilindi", description: "Kontent (HTML) maydoniga joylandi." });
                   } catch (error) {
                     toast({

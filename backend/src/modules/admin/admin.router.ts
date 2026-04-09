@@ -14,6 +14,7 @@ import { adminAuditRouter } from "./audit.router";
 import { adminFeedbackRouter } from "./feedback.router";
 import { adminSiteRouter } from "./site.router";
 import { adminLocationsRouter } from "./locations.router";
+import { adminWordHtmRouter } from "./word-htm.router";
 
 export const adminRouter = Router();
 
@@ -27,6 +28,7 @@ adminRouter.use("/materials", adminMaterialsRouter);
 adminRouter.use("/quiz/directions", adminDirectionsRouter);
 adminRouter.use("/quiz/questions", adminQuestionsRouter);
 adminRouter.use("/uploads", adminUploadsRouter);
+adminRouter.use("/word-htm", adminWordHtmRouter);
 adminRouter.use("/feedback", adminFeedbackRouter);
 adminRouter.use("/site", adminSiteRouter);
 adminRouter.use("/locations", adminLocationsRouter);

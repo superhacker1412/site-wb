@@ -5,6 +5,9 @@ import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import TextAlign from "@tiptap/extension-text-align";
+import Paragraph from "@tiptap/extension-paragraph";
+import Heading from "@tiptap/extension-heading";
+import { TextStyle } from "@tiptap/extension-text-style";
 import { NodeSelection } from "@tiptap/pm/state";
 import {
   AlignCenter,
@@ -62,6 +65,80 @@ function getImageStyle(align: "left" | "center" | "right"): string {
   if (align === "right") return "display:block;margin:0 0 0 auto;max-width:100%;height:auto;";
   return "display:block;margin:0 auto;max-width:100%;height:auto;";
 }
+
+const StyledParagraph = Paragraph.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      style: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("style"),
+        renderHTML: (attributes) => (attributes.style ? { style: attributes.style } : {}),
+      },
+      class: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("class"),
+        renderHTML: (attributes) => (attributes.class ? { class: attributes.class } : {}),
+      },
+    };
+  },
+});
+
+const StyledHeading = Heading.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      style: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("style"),
+        renderHTML: (attributes) => (attributes.style ? { style: attributes.style } : {}),
+      },
+      class: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("class"),
+        renderHTML: (attributes) => (attributes.class ? { class: attributes.class } : {}),
+      },
+    };
+  },
+});
+
+const StyledImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      style: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("style"),
+        renderHTML: (attributes) => (attributes.style ? { style: attributes.style } : {}),
+      },
+      class: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("class"),
+        renderHTML: (attributes) => (attributes.class ? { class: attributes.class } : {}),
+      },
+      width: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("width"),
+      },
+      height: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("height"),
+      },
+      align: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("align"),
+      },
+      hspace: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("hspace"),
+      },
+      vspace: {
+        default: null,
+        parseHTML: (element) => element.getAttribute("vspace"),
+      },
+    };
+  },
+});
 
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const { toast } = useToast();
@@ -131,6 +208,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         // Some StarterKit builds include these; we register them explicitly below.
         link: false,
         underline: false,
+        paragraph: false,
+        heading: false,
       }),
       Underline,
       Link.configure({
@@ -142,7 +221,10 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           target: "_blank",
         },
       }),
-      Image.configure({
+      TextStyle,
+      StyledParagraph,
+      StyledHeading.configure({ levels: [1, 2, 3, 4, 5, 6] }),
+      StyledImage.configure({
         inline: false,
         allowBase64: true,
         HTMLAttributes: {
