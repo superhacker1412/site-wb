@@ -42,7 +42,11 @@ export default function AdminMaterialFormPage() {
   const [docConverting, setDocConverting] = useState(false);
   const [docProgressText, setDocProgressText] = useState<string>("");
   const [docUploadedImagesCount, setDocUploadedImagesCount] = useState(0);
+  const [docImagesTotal, setDocImagesTotal] = useState<number>(0);
+  const [docLastSummary, setDocLastSummary] = useState<string>("");
   const docInputRef = useRef<HTMLInputElement | null>(null);
+  const htmInputRef = useRef<HTMLInputElement | null>(null);
+  const htmFolderInputRef = useRef<HTMLInputElement | null>(null);
   const [form, setForm] = useState<MaterialFormState>({
     id: "",
     categoryId: "",
@@ -167,6 +171,16 @@ export default function AdminMaterialFormPage() {
     return response.file.relativePath;
   };
 
+  const decodeText = (buffer: ArrayBuffer): string => {
+    // Word “Web Page, Filtered” often uses windows-1251.
+    try {
+      // @ts-expect-error - some TS libdefs omit legacy encodings, runtime supports it in modern browsers.
+      return new TextDecoder("windows-1251").decode(buffer);
+    } catch {
+      return new TextDecoder("utf-8").decode(buffer);
+    }
+  };
+
   const convertDocxToHtml = async (file: File): Promise<string> => {
     const arrayBuffer = await file.arrayBuffer();
     setDocProgressText("DOCX o'qilmoqda va HTML ga o'girilmoqda...");
@@ -210,6 +224,61 @@ export default function AdminMaterialFormPage() {
     );
 
     return result.value || "<p></p>";
+  };
+
+  const importWordHtm = async (htmFile: File, folderFiles: FileList): Promise<string> => {
+    const htmBuffer = await htmFile.arrayBuffer();
+    const htmlText = decodeText(htmBuffer);
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, "text/html");
+
+    const fileMap = new Map<string, File>();
+    Array.from(folderFiles).forEach((f) => {
+      // When selecting a directory, browsers provide webkitRelativePath.
+      const rel = (f as any).webkitRelativePath as string | undefined;
+      if (rel) fileMap.set(rel.replace(/\\\\/g, "/"), f);
+      fileMap.set(f.name, f);
+    });
+
+    const imgs = Array.from(doc.querySelectorAll("img"));
+    setDocImagesTotal(imgs.length);
+    setDocUploadedImagesCount(0);
+    setDocProgressText(`HTM import: rasmlar topildi: ${imgs.length}`);
+
+    let uploaded = 0;
+    for (const img of imgs) {
+      const src = img.getAttribute("src") || "";
+      if (!src || /^https?:\/\//i.test(src) || src.startsWith("data:") || src.startsWith("/uploads/")) {
+        continue;
+      }
+
+      // Word exports like "1-Dars.files/image001.jpg". Try exact match, then basename.
+      const normalized = src.replace(/\\\\/g, "/");
+      const basename = normalized.split("/").pop() || normalized;
+      const file =
+        fileMap.get(normalized) ||
+        fileMap.get(basename) ||
+        Array.from(folderFiles).find((f) => ((f as any).webkitRelativePath as string | undefined)?.endsWith("/" + basename)) ||
+        null;
+
+      if (!file) continue;
+
+      setDocProgressText(`Rasmlar yuklanmoqda... (${uploaded}/${imgs.length})`);
+      try {
+        const relativePath = await uploadImageToBackend(file, file.name);
+        img.setAttribute("src", relativePath);
+        uploaded += 1;
+        setDocUploadedImagesCount(uploaded);
+        setDocProgressText(`Rasmlar yuklanmoqda... (yuklandi: ${uploaded}/${imgs.length})`);
+      } catch {
+        // leave src as-is if upload fails
+      }
+    }
+
+    const bodyInner = doc.body?.innerHTML || "<p></p>";
+    setDocLastSummary(`HTM import tugadi. Rasmlar: ${uploaded}/${imgs.length}`);
+    return bodyInner;
   };
 
   const improveImportedHtmlLayout = (html: string): string => {
@@ -368,11 +437,14 @@ export default function AdminMaterialFormPage() {
                 if (!file) return;
                 try {
                   setDocConverting(true);
+                  setDocLastSummary("");
                   setDocUploadedImagesCount(0);
+                  setDocImagesTotal(0);
                   setDocProgressText("DOCX import boshlanmoqda...");
                   const html = await convertDocxToHtml(file);
                   const improved = improveImportedHtmlLayout(html);
                   setForm((prev) => ({ ...prev, contentHtml: improved }));
+                  setDocLastSummary(`DOCX import tugadi. Rasmlar yuklandi: ${docUploadedImagesCount}`);
                   toast({ title: "DOCX import qilindi", description: "Kontent (HTML) maydoniga joylandi." });
                 } catch (error) {
                   toast({
@@ -392,8 +464,73 @@ export default function AdminMaterialFormPage() {
             </div>
             {docConverting ? (
               <div className="text-sm text-muted-foreground">
-                {docProgressText || "Import qilinmoqda..."} {docUploadedImagesCount > 0 ? `(rasmlar: ${docUploadedImagesCount})` : ""}
+                {docProgressText || "Import qilinmoqda..."}{" "}
+                {docImagesTotal > 0 ? `(rasmlar: ${docUploadedImagesCount}/${docImagesTotal})` : docUploadedImagesCount > 0 ? `(rasmlar: ${docUploadedImagesCount})` : ""}
               </div>
+            ) : null}
+            {!docConverting && docLastSummary ? (
+              <div className="text-sm text-muted-foreground">{docLastSummary}</div>
+            ) : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Word HTM (Web Page) import</Label>
+            <div className="grid gap-2 md:grid-cols-2">
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">1) .htm fayl</div>
+                <Input
+                  ref={htmInputRef}
+                  type="file"
+                  accept=".htm,.html,text/html"
+                  onChange={async (event) => {
+                    const htm = event.target.files?.[0] || null;
+                    const folder = htmFolderInputRef.current?.files || null;
+                    if (!htm || !folder || folder.length === 0) return;
+                    try {
+                      setDocConverting(true);
+                      setDocLastSummary("");
+                      setDocProgressText("HTM import boshlanmoqda...");
+                      const html = await importWordHtm(htm, folder);
+                      const improved = improveImportedHtmlLayout(html);
+                      setForm((prev) => ({ ...prev, contentHtml: improved }));
+                      toast({ title: "HTM import qilindi", description: "Kontent (HTML) maydoniga joylandi." });
+                    } catch (error) {
+                      toast({
+                        title: "HTM import xatolik",
+                        description: error instanceof Error ? error.message : "Amal bajarilmadi",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setDocConverting(false);
+                      setDocProgressText("");
+                      event.target.value = "";
+                    }
+                  }}
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="text-xs text-muted-foreground">2) .files papka (rasmlar)</div>
+                <input
+                  ref={htmFolderInputRef}
+                  type="file"
+                  multiple
+                  // @ts-expect-error - non-standard attribute supported by Chromium-based browsers.
+                  webkitdirectory=""
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                />
+              </div>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Word'da <b>Save As → Web Page, Filtered (*.htm)</b> qiling. Keyin .htm fayl va yonidagi <code>*.files</code> papkani tanlang.
+            </div>
+            {docConverting ? (
+              <div className="text-sm text-muted-foreground">
+                {docProgressText || "Import qilinmoqda..."}{" "}
+                {docImagesTotal > 0 ? `(rasmlar: ${docUploadedImagesCount}/${docImagesTotal})` : docUploadedImagesCount > 0 ? `(rasmlar: ${docUploadedImagesCount})` : ""}
+              </div>
+            ) : null}
+            {!docConverting && docLastSummary ? (
+              <div className="text-sm text-muted-foreground">{docLastSummary}</div>
             ) : null}
           </div>
 
