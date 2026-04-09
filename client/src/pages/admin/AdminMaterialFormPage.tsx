@@ -558,27 +558,9 @@ export default function AdminMaterialFormPage() {
                     setDocUploadedImagesCount(0);
                     setDocImagesTotal(0);
                     setDocProgressText("HTM import boshlanmoqda...");
-                    const formData = new FormData();
-                    formData.append("htm", selectedHtmFile);
-                    Array.from(selectedHtmFolderFiles).forEach((file) => {
-                      formData.append("assets", file, file.name);
-                    });
-
-                    setDocProgressText("Serverda qayta ishlanmoqda (HTM + rasmlar)...");
-                    const response = await apiFetch<{ html: string; images: { totalInHtml: number; assetsProvided: number; assetsSaved: number; replaced: number } }>(
-                      "/admin/word-htm/import",
-                      {
-                        method: "POST",
-                        body: formData,
-                      },
-                    );
-                    setDocImagesTotal(response.images.totalInHtml);
-                    setDocUploadedImagesCount(response.images.replaced);
-                    const improved = improveImportedHtmlLayout(response.html || "<p></p>");
+                    const html = await importWordHtm(selectedHtmFile, selectedHtmFolderFiles);
+                    const improved = improveImportedHtmlLayout(html);
                     setForm((prev) => ({ ...prev, contentHtml: improved }));
-                    setDocLastSummary(
-                      `HTM import tugadi. Rasmlar: ${response.images.replaced}/${response.images.totalInHtml} (saqlandi: ${response.images.assetsSaved})`,
-                    );
                     toast({ title: "HTM import qilindi", description: "Kontent (HTML) maydoniga joylandi." });
                   } catch (error) {
                     toast({
