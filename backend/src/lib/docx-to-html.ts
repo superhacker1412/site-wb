@@ -42,10 +42,19 @@ export async function convertDocxFileToHtmlAndSaveImages(params: {
   }
 
   const warnings: string[] = [];
+  // Mammoth’s bundled TypeScript types may lag behind the runtime API.
+  // We intentionally use a narrow cast here to keep builds working.
+  const mammothAny = mammoth as unknown as {
+    convertToHtml: typeof mammoth.convertToHtml;
+    images: {
+      inline: (converter: (image: { contentType?: string; read: () => Promise<ArrayBuffer | Buffer | Uint8Array> }) => Promise<{ src: string }>) => unknown;
+    };
+  };
   const result = await mammoth.convertToHtml(
     { buffer: docxBuffer },
     {
-      convertImage: mammoth.images.inline(async (image) => {
+      // Cast because mammoth’s public runtime API is correct, but TS types vary by package version.
+      convertImage: mammothAny.images.inline(async (image) => {
         const contentType = image.contentType;
         const ext = extFromContentType(contentType);
         if (!ext) {
@@ -56,10 +65,10 @@ export async function convertDocxFileToHtmlAndSaveImages(params: {
         const bytes = await image.read();
         const filename = `${Date.now()}-${crypto.randomUUID()}${ext}`;
         const absolutePath = path.join(uploadsDocImagesDir, filename);
-        await fs.promises.writeFile(absolutePath, Buffer.from(bytes));
+        await fs.promises.writeFile(absolutePath, Buffer.from(bytes as any));
         return { src: `/uploads/doc-images/${filename}` };
-      }),
-    },
+      }) as any,
+    } as any,
   );
 
   // Mammoth may include empty src="" for skipped images; strip those.
