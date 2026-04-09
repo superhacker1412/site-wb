@@ -11,6 +11,7 @@ import {
   AlignLeft,
   AlignRight,
   Bold,
+  Code,
   Heading2,
   ImagePlus,
   Italic,
@@ -24,6 +25,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch, API_ORIGIN } from "@/lib/api";
 
@@ -63,6 +66,8 @@ function getImageStyle(align: "left" | "center" | "right"): string {
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [htmlOpen, setHtmlOpen] = useState(false);
+  const [htmlDraft, setHtmlDraft] = useState("");
   const insertImageInputRef = useRef<HTMLInputElement | null>(null);
   const replaceImageInputRef = useRef<HTMLInputElement | null>(null);
   const emittingRef = useRef(false);
@@ -135,7 +140,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       }),
       Image.configure({
         inline: false,
-        allowBase64: false,
+        allowBase64: true,
         HTMLAttributes: {
           style: getImageStyle("center"),
         },
@@ -345,6 +350,17 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           >
             <ImagePlus className="h-4 w-4" />
           </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setHtmlDraft(editor.getHTML());
+              setHtmlOpen(true);
+            }}
+          >
+            <Code className="h-4 w-4" />
+          </Button>
           <Button type="button" variant="ghost" size="sm" onClick={() => setImageAlign("left")}>
             Img L
           </Button>
@@ -417,6 +433,53 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           </div>
         ) : null}
       </div>
+
+      <Dialog open={htmlOpen} onOpenChange={setHtmlOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>HTML editor</DialogTitle>
+            <DialogDescription>Bu yerda kontentni HTML ko'rinishida tahrirlashingiz mumkin.</DialogDescription>
+          </DialogHeader>
+
+          <Textarea
+            value={htmlDraft}
+            onChange={(e) => setHtmlDraft(e.target.value)}
+            className="min-h-[360px] font-mono text-xs"
+            placeholder="<p>...</p>"
+          />
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setHtmlOpen(false);
+              }}
+            >
+              Bekor qilish
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                try {
+                  editor.commands.setContent(normalizeEditorHtml(htmlDraft), { emitUpdate: true });
+                  toast({ title: "HTML qo'llandi" });
+                  setHtmlOpen(false);
+                } catch (e) {
+                  toast({
+                    title: "HTML xatolik",
+                    description: e instanceof Error ? e.message : "Amal bajarilmadi",
+                    variant: "destructive",
+                  });
+                }
+              }}
+            >
+              Qo'llash
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <input
         ref={insertImageInputRef}
         type="file"

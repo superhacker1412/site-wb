@@ -85,6 +85,8 @@ export default function AdminMaterialFormPage() {
     if (ct === "image/gif") return { ext: "gif", mime: "image/gif" };
     if (ct === "image/webp") return { ext: "webp", mime: "image/webp" };
     if (ct === "image/avif") return { ext: "avif", mime: "image/avif" };
+    if (ct === "image/bmp") return { ext: "bmp", mime: "image/bmp" };
+    if (ct === "image/svg+xml") return { ext: "svg", mime: "image/svg+xml" };
     return { ext: "png", mime: "image/png" };
   };
 
@@ -137,7 +139,22 @@ export default function AdminMaterialFormPage() {
       return { ext: "webp", mime: "image/webp" };
     }
 
+    // BMP: "BM"
+    if (bytes.length >= 2 && bytes[0] === 0x42 && bytes[1] === 0x4d) {
+      return { ext: "bmp", mime: "image/bmp" };
+    }
+
     return null;
+  };
+
+  const toBase64 = (buffer: ArrayBuffer | Uint8Array): string => {
+    const bytes = buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer);
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
   };
 
   const uploadImageToBackend = async (blob: Blob, filename: string): Promise<string> => {
@@ -171,12 +188,23 @@ export default function AdminMaterialFormPage() {
           const byType = fileFromContentType(image?.contentType as string | undefined);
           const chosen = byMagic || byType;
 
-          const blob = new Blob([uint8], { type: chosen.mime });
-          const relativePath = await uploadImageToBackend(blob, `docx-image.${chosen.ext}`);
-          uploadedImages += 1;
-          setDocUploadedImagesCount(uploadedImages);
-          setDocProgressText(`Rasmlar yuklanmoqda... (yuklandi: ${uploadedImages})`);
-          return { src: relativePath };
+          // Try uploading to backend for supported browser-image formats.
+          // If upload fails or the format is not accepted by backend, fall back to data URL (still visible).
+          try {
+            const blob = new Blob([uint8], { type: chosen.mime });
+            const relativePath = await uploadImageToBackend(blob, `docx-image.${chosen.ext}`);
+            uploadedImages += 1;
+            setDocUploadedImagesCount(uploadedImages);
+            setDocProgressText(`Rasmlar yuklanmoqda... (yuklandi: ${uploadedImages})`);
+            return { src: relativePath };
+          } catch {
+            const contentType = (image?.contentType as string | undefined) || chosen.mime || "application/octet-stream";
+            const base64 = toBase64(uint8);
+            uploadedImages += 1;
+            setDocUploadedImagesCount(uploadedImages);
+            setDocProgressText(`Rasmlar tayyorlanmoqda... (yuklandi: ${uploadedImages})`);
+            return { src: `data:${contentType};base64,${base64}` };
+          }
         }),
       },
     );

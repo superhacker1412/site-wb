@@ -20,6 +20,8 @@ const allowedMimeTypes = new Map([
     ["image/webp", ".webp"],
     ["image/gif", ".gif"],
     ["image/avif", ".avif"],
+    ["image/bmp", ".bmp"],
+    ["image/svg+xml", ".svg"],
 ]);
 const uploader = (0, multer_1.default)({
     storage: multer_1.default.diskStorage({

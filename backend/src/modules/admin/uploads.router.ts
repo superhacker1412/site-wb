@@ -17,6 +17,8 @@ const allowedMimeTypes = new Map<string, string>([
   ["image/webp", ".webp"],
   ["image/gif", ".gif"],
   ["image/avif", ".avif"],
+  ["image/bmp", ".bmp"],
+  ["image/svg+xml", ".svg"],
 ]);
 
 const uploader = multer({
