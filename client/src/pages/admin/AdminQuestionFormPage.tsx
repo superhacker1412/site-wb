@@ -48,7 +48,7 @@ type QuestionFormState = {
 };
 
 const YES_NO_VALUES = ["Ha", "Yo'q"] as const;
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
 
 function createOptionDraft(initial?: Partial<QuestionOptionDraft>): QuestionOptionDraft {
   return {

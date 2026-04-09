@@ -33,7 +33,7 @@ type RichTextEditorProps = {
   placeholder?: string;
 };
 
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 100 * 1024 * 1024;
 
 function formatBytesToMb(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(0)} MB`;

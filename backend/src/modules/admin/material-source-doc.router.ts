@@ -34,7 +34,7 @@ const uploader = multer({
       cb(null, `${Date.now()}-${crypto.randomUUID()}${ext}`);
     },
   }),
-  limits: { fileSize: 50 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!allowedDocxMimeTypes.has((file.mimetype || "").toLowerCase())) {
       cb(new AppError("Unsupported document type (upload .docx)", 422));
