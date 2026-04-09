@@ -88,6 +88,58 @@ export default function AdminMaterialFormPage() {
     return { ext: "png", mime: "image/png" };
   };
 
+  const fileFromMagicBytes = (bytes: Uint8Array): { ext: string; mime: string } | null => {
+    // PNG
+    if (
+      bytes.length >= 8 &&
+      bytes[0] === 0x89 &&
+      bytes[1] === 0x50 &&
+      bytes[2] === 0x4e &&
+      bytes[3] === 0x47 &&
+      bytes[4] === 0x0d &&
+      bytes[5] === 0x0a &&
+      bytes[6] === 0x1a &&
+      bytes[7] === 0x0a
+    ) {
+      return { ext: "png", mime: "image/png" };
+    }
+
+    // JPEG
+    if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+      return { ext: "jpg", mime: "image/jpeg" };
+    }
+
+    // GIF
+    if (
+      bytes.length >= 6 &&
+      bytes[0] === 0x47 &&
+      bytes[1] === 0x49 &&
+      bytes[2] === 0x46 &&
+      bytes[3] === 0x38 &&
+      (bytes[4] === 0x37 || bytes[4] === 0x39) &&
+      bytes[5] === 0x61
+    ) {
+      return { ext: "gif", mime: "image/gif" };
+    }
+
+    // WEBP: "RIFF" .... "WEBP"
+    if (
+      bytes.length >= 12 &&
+      bytes[0] === 0x52 &&
+      bytes[1] === 0x49 &&
+      bytes[2] === 0x46 &&
+      bytes[3] === 0x46 &&
+      bytes[8] === 0x57 &&
+      bytes[9] === 0x45 &&
+      bytes[10] === 0x42 &&
+      bytes[11] === 0x50
+    ) {
+      return { ext: "webp", mime: "image/webp" };
+    }
+
+    return null;
+  };
+
   const uploadImageToBackend = async (blob: Blob, filename: string): Promise<string> => {
     const formData = new FormData();
     formData.append("file", new File([blob], filename, { type: blob.type || "application/octet-stream" }));
@@ -113,11 +165,14 @@ export default function AdminMaterialFormPage() {
       {
         convertImage: mammothAny.images.inline(async (image) => {
           setDocProgressText((prev) => prev || "Rasmlar yuklanmoqda...");
-          const { ext, mime } = fileFromContentType(image?.contentType as string | undefined);
           const bytes = (await image.read()) as ArrayBuffer | Uint8Array;
           const uint8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-          const blob = new Blob([uint8], { type: mime });
-          const relativePath = await uploadImageToBackend(blob, `docx-image.${ext}`);
+          const byMagic = fileFromMagicBytes(uint8);
+          const byType = fileFromContentType(image?.contentType as string | undefined);
+          const chosen = byMagic || byType;
+
+          const blob = new Blob([uint8], { type: chosen.mime });
+          const relativePath = await uploadImageToBackend(blob, `docx-image.${chosen.ext}`);
           uploadedImages += 1;
           setDocUploadedImagesCount(uploadedImages);
           setDocProgressText(`Rasmlar yuklanmoqda... (yuklandi: ${uploadedImages})`);
@@ -127,6 +182,70 @@ export default function AdminMaterialFormPage() {
     );
 
     return result.value || "<p></p>";
+  };
+
+  const improveImportedHtmlLayout = (html: string): string => {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      // Ensure images are responsive by default.
+      doc.querySelectorAll("img").forEach((img) => {
+        const existing = img.getAttribute("style") || "";
+        const needsMax = !/max-width\s*:/i.test(existing);
+        const needsHeight = !/height\s*:/i.test(existing);
+        const nextStyle = [
+          existing.trim(),
+          needsMax ? "max-width:100%;" : "",
+          needsHeight ? "height:auto;" : "",
+        ]
+          .filter(Boolean)
+          .join(existing.trim() ? ";" : "");
+        if (nextStyle.trim()) img.setAttribute("style", nextStyle);
+      });
+
+      // 1) If a paragraph contains 2+ images and no meaningful text -> turn into a grid row.
+      doc.querySelectorAll("p").forEach((p) => {
+        const imgs = Array.from(p.querySelectorAll("img"));
+        if (imgs.length < 2) return;
+        const text = (p.textContent || "").replace(/\s+/g, " ").trim();
+        if (text.length > 0) return;
+
+        const wrapper = doc.createElement("div");
+        wrapper.className = "docx-image-row";
+        imgs.forEach((img) => {
+          // Ensure images behave like tiles; CSS handles the actual layout.
+          const existing = img.getAttribute("style") || "";
+          if (!/width\s*:/i.test(existing)) {
+            img.setAttribute("style", `${existing}${existing.trim() ? ";" : ""}width:100%;height:auto;`);
+          }
+          wrapper.appendChild(img);
+        });
+
+        p.replaceWith(wrapper);
+      });
+
+      // 2) If a paragraph contains an image + text, float the image left (Word-like).
+      doc.querySelectorAll("p").forEach((p) => {
+        const imgs = Array.from(p.querySelectorAll("img"));
+        if (imgs.length !== 1) return;
+        const img = imgs[0];
+        const text = (p.textContent || "").replace(/\s+/g, " ").trim();
+        if (!text) return;
+
+        const existing = img.getAttribute("style") || "";
+        if (!/float\s*:/i.test(existing)) {
+          img.setAttribute(
+            "style",
+            `${existing}${existing.trim() ? ";" : ""}float:left;margin:0 12px 12px 0;max-width:50%;height:auto;`,
+          );
+        }
+      });
+
+      return doc.body.innerHTML || html;
+    } catch {
+      return html;
+    }
   };
 
   const onSubmit = async () => {
@@ -224,7 +343,8 @@ export default function AdminMaterialFormPage() {
                   setDocUploadedImagesCount(0);
                   setDocProgressText("DOCX import boshlanmoqda...");
                   const html = await convertDocxToHtml(file);
-                  setForm((prev) => ({ ...prev, contentHtml: html }));
+                  const improved = improveImportedHtmlLayout(html);
+                  setForm((prev) => ({ ...prev, contentHtml: improved }));
                   toast({ title: "DOCX import qilindi", description: "Kontent (HTML) maydoniga joylandi." });
                 } catch (error) {
                   toast({

@@ -97,8 +97,9 @@ export default function MaterialDetail() {
         </div>
 
         <h1 className="mb-6 text-3xl font-bold md:text-4xl">{material.title}</h1>
+
         <div
-          className="prose max-w-none prose-img:my-4 prose-table:w-full prose-table:table-auto prose-td:align-top prose-th:align-top"
+          className="prose max-w-none prose-img:my-4 prose-table:w-full prose-table:table-auto prose-td:align-top prose-th:align-top [&_.docx-image-row]:grid [&_.docx-image-row]:grid-cols-2 [&_.docx-image-row]:gap-3 [&_.docx-image-row_img]:w-full [&_.docx-image-row_img]:h-auto"
           dangerouslySetInnerHTML={{ __html: normalizedContentHtml }}
         />
       </article>
