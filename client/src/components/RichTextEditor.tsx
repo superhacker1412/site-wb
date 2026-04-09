@@ -239,7 +239,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     editorProps: {
       attributes: {
         class:
-          "min-h-[320px] rounded-b-md border border-t-0 bg-background px-3 py-3 text-sm leading-6 outline-none prose prose-sm max-w-none prose-img:my-4 [&_.ProseMirror-selectednode]:outline [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-primary [&_img]:cursor-pointer [&_.docx-image-row]:grid [&_.docx-image-row]:grid-cols-2 [&_.docx-image-row]:gap-3 [&_.docx-image-row_img]:w-full [&_.docx-image-row_img]:h-auto",
+          "min-h-[320px] rounded-b-md border border-t-0 bg-background px-3 py-3 text-sm leading-6 outline-none prose prose-sm max-w-none prose-img:my-4 [&_.ProseMirror-selectednode]:outline [&_.ProseMirror-selectednode]:outline-2 [&_.ProseMirror-selectednode]:outline-primary [&_img]:cursor-pointer [&_.docx-image-row]:grid [&_.docx-image-row]:gap-3 [&_.docx-image-row]:items-start [&_.docx-image-row_img]:w-full [&_.docx-image-row_img]:h-auto [&_.docx-image-row--2]:grid-cols-2 [&_.docx-image-row--3]:grid-cols-3 [&_.docx-image-row--4]:grid-cols-4",
       },
       handleClickOn(view, pos, node) {
         if (node.type.name !== "image") return false;

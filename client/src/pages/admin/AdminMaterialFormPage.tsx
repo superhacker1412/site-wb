@@ -324,6 +324,19 @@ export default function AdminMaterialFormPage() {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, "text/html");
 
+      const isMeaningfulTextForImageRow = (text: string): boolean => {
+        // Treat Word separators like commas/nbsp/bullets as "not meaningful"
+        const normalized = (text || "")
+          .replace(/\u00a0/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          // remove common separators
+          .replace(/[,\.;:|·•]+/g, "")
+          // remove leftover spaces
+          .replace(/\s+/g, "");
+        return normalized.length > 0;
+      };
+
       // Ensure images are responsive by default.
       doc.querySelectorAll("img").forEach((img) => {
         const existing = img.getAttribute("style") || "";
@@ -344,10 +357,11 @@ export default function AdminMaterialFormPage() {
         const imgs = Array.from(p.querySelectorAll("img"));
         if (imgs.length < 2) return;
         const text = (p.textContent || "").replace(/\s+/g, " ").trim();
-        if (text.length > 0) return;
+        if (isMeaningfulTextForImageRow(text)) return;
 
         const wrapper = doc.createElement("div");
-        wrapper.className = "docx-image-row";
+        const cols = Math.min(imgs.length, 4);
+        wrapper.className = `docx-image-row docx-image-row--${cols}`;
         imgs.forEach((img) => {
           // Ensure images behave like tiles; CSS handles the actual layout.
           const existing = img.getAttribute("style") || "";
