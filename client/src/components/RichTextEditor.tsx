@@ -127,7 +127,11 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        // Some StarterKit builds include these; we register them explicitly below.
+        link: false,
+        underline: false,
+      }),
       Underline,
       Link.configure({
         openOnClick: false,
