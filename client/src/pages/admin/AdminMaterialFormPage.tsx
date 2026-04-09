@@ -47,6 +47,8 @@ export default function AdminMaterialFormPage() {
   const docInputRef = useRef<HTMLInputElement | null>(null);
   const htmInputRef = useRef<HTMLInputElement | null>(null);
   const htmFolderInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedHtmFile, setSelectedHtmFile] = useState<File | null>(null);
+  const [selectedHtmFolderFiles, setSelectedHtmFolderFiles] = useState<FileList | null>(null);
   const [form, setForm] = useState<MaterialFormState>({
     id: "",
     categoryId: "",
@@ -482,29 +484,9 @@ export default function AdminMaterialFormPage() {
                   ref={htmInputRef}
                   type="file"
                   accept=".htm,.html,text/html"
-                  onChange={async (event) => {
+                  onChange={(event) => {
                     const htm = event.target.files?.[0] || null;
-                    const folder = htmFolderInputRef.current?.files || null;
-                    if (!htm || !folder || folder.length === 0) return;
-                    try {
-                      setDocConverting(true);
-                      setDocLastSummary("");
-                      setDocProgressText("HTM import boshlanmoqda...");
-                      const html = await importWordHtm(htm, folder);
-                      const improved = improveImportedHtmlLayout(html);
-                      setForm((prev) => ({ ...prev, contentHtml: improved }));
-                      toast({ title: "HTM import qilindi", description: "Kontent (HTML) maydoniga joylandi." });
-                    } catch (error) {
-                      toast({
-                        title: "HTM import xatolik",
-                        description: error instanceof Error ? error.message : "Amal bajarilmadi",
-                        variant: "destructive",
-                      });
-                    } finally {
-                      setDocConverting(false);
-                      setDocProgressText("");
-                      event.target.value = "";
-                    }
+                    setSelectedHtmFile(htm);
                   }}
                 />
               </div>
@@ -517,12 +499,66 @@ export default function AdminMaterialFormPage() {
                   // @ts-expect-error - non-standard attribute supported by Chromium-based browsers.
                   webkitdirectory=""
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium"
+                  onChange={(event) => {
+                    setSelectedHtmFolderFiles(event.target.files && event.target.files.length > 0 ? event.target.files : null);
+                  }}
                 />
               </div>
             </div>
             <div className="text-sm text-muted-foreground">
               Word'da <b>Save As → Web Page, Filtered (*.htm)</b> qiling. Keyin .htm fayl va yonidagi <code>*.files</code> papkani tanlang.
             </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={docConverting || !selectedHtmFile || !selectedHtmFolderFiles || selectedHtmFolderFiles.length === 0}
+                onClick={async () => {
+                  if (!selectedHtmFile || !selectedHtmFolderFiles || selectedHtmFolderFiles.length === 0) return;
+                  try {
+                    setDocConverting(true);
+                    setDocLastSummary("");
+                    setDocUploadedImagesCount(0);
+                    setDocImagesTotal(0);
+                    setDocProgressText("HTM import boshlanmoqda...");
+                    const html = await importWordHtm(selectedHtmFile, selectedHtmFolderFiles);
+                    const improved = improveImportedHtmlLayout(html);
+                    setForm((prev) => ({ ...prev, contentHtml: improved }));
+                    toast({ title: "HTM import qilindi", description: "Kontent (HTML) maydoniga joylandi." });
+                  } catch (error) {
+                    toast({
+                      title: "HTM import xatolik",
+                      description: error instanceof Error ? error.message : "Amal bajarilmadi",
+                      variant: "destructive",
+                    });
+                  } finally {
+                    setDocConverting(false);
+                    setDocProgressText("");
+                  }
+                }}
+              >
+                Obработать
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={docConverting}
+                onClick={() => {
+                  setSelectedHtmFile(null);
+                  setSelectedHtmFolderFiles(null);
+                  if (htmInputRef.current) htmInputRef.current.value = "";
+                  if (htmFolderInputRef.current) htmFolderInputRef.current.value = "";
+                  setDocLastSummary("");
+                  setDocProgressText("");
+                  setDocImagesTotal(0);
+                  setDocUploadedImagesCount(0);
+                }}
+              >
+                Tozalash
+              </Button>
+            </div>
+
             {docConverting ? (
               <div className="text-sm text-muted-foreground">
                 {docProgressText || "Import qilinmoqda..."}{" "}
