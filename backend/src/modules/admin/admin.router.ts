@@ -14,7 +14,6 @@ import { adminAuditRouter } from "./audit.router";
 import { adminFeedbackRouter } from "./feedback.router";
 import { adminSiteRouter } from "./site.router";
 import { adminLocationsRouter } from "./locations.router";
-import { adminMaterialSourceDocRouter } from "./material-source-doc.router";
 
 export const adminRouter = Router();
 
@@ -25,7 +24,6 @@ adminRouter.use("/audit", adminAuditRouter);
 adminRouter.use("/users", adminUsersRouter);
 adminRouter.use("/categories", adminCategoriesRouter);
 adminRouter.use("/materials", adminMaterialsRouter);
-adminRouter.use("/materials", adminMaterialSourceDocRouter);
 adminRouter.use("/quiz/directions", adminDirectionsRouter);
 adminRouter.use("/quiz/questions", adminQuestionsRouter);
 adminRouter.use("/uploads", adminUploadsRouter);

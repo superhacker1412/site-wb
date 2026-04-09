@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import mammoth from "mammoth";
 
 import { apiFetch } from "@/lib/api";
 import AdminPageHeader from "@/pages/admin/AdminPageHeader";
@@ -38,9 +39,10 @@ export default function AdminMaterialFormPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
-  const [docUploading, setDocUploading] = useState(false);
+  const [docConverting, setDocConverting] = useState(false);
+  const [docProgressText, setDocProgressText] = useState<string>("");
+  const [docUploadedImagesCount, setDocUploadedImagesCount] = useState(0);
   const docInputRef = useRef<HTMLInputElement | null>(null);
-  const selectedDocRef = useRef<File | null>(null);
   const [form, setForm] = useState<MaterialFormState>({
     id: "",
     categoryId: "",
@@ -76,10 +78,61 @@ export default function AdminMaterialFormPage() {
     });
   }, [id, isEdit, materialsQuery.data?.materials]);
 
+  const fileFromContentType = (contentType: string | undefined): { ext: string; mime: string } => {
+    const ct = (contentType || "").toLowerCase();
+    if (ct === "image/jpeg") return { ext: "jpg", mime: "image/jpeg" };
+    if (ct === "image/png") return { ext: "png", mime: "image/png" };
+    if (ct === "image/gif") return { ext: "gif", mime: "image/gif" };
+    if (ct === "image/webp") return { ext: "webp", mime: "image/webp" };
+    if (ct === "image/avif") return { ext: "avif", mime: "image/avif" };
+    return { ext: "png", mime: "image/png" };
+  };
+
+  const uploadImageToBackend = async (blob: Blob, filename: string): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", new File([blob], filename, { type: blob.type || "application/octet-stream" }));
+    const response = await apiFetch<{ file: { relativePath: string } }>("/admin/uploads", {
+      method: "POST",
+      body: formData,
+    });
+    return response.file.relativePath;
+  };
+
+  const convertDocxToHtml = async (file: File): Promise<string> => {
+    const arrayBuffer = await file.arrayBuffer();
+    setDocProgressText("DOCX o'qilmoqda va HTML ga o'girilmoqda...");
+    let uploadedImages = 0;
+
+    const mammothAny = mammoth as unknown as {
+      convertToHtml: typeof mammoth.convertToHtml;
+      images: { inline: (cb: (image: any) => Promise<{ src: string }>) => any };
+    };
+
+    const result = await mammothAny.convertToHtml(
+      { arrayBuffer },
+      {
+        convertImage: mammothAny.images.inline(async (image) => {
+          setDocProgressText((prev) => prev || "Rasmlar yuklanmoqda...");
+          const { ext, mime } = fileFromContentType(image?.contentType as string | undefined);
+          const bytes = (await image.read()) as ArrayBuffer | Uint8Array;
+          const uint8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+          const blob = new Blob([uint8], { type: mime });
+          const relativePath = await uploadImageToBackend(blob, `docx-image.${ext}`);
+          uploadedImages += 1;
+          setDocUploadedImagesCount(uploadedImages);
+          setDocProgressText(`Rasmlar yuklanmoqda... (yuklandi: ${uploadedImages})`);
+          return { src: relativePath };
+        }),
+      },
+    );
+
+    return result.value || "<p></p>";
+  };
+
   const onSubmit = async () => {
     try {
       setSaving(true);
-      const response = await apiFetch<{ material: AdminMaterial }>(isEdit ? `/admin/materials/${id}` : "/admin/materials", {
+      await apiFetch<{ material: AdminMaterial }>(isEdit ? `/admin/materials/${id}` : "/admin/materials", {
         method: isEdit ? "PATCH" : "POST",
         body: {
           ...(isEdit ? {} : { id: form.id || undefined }),
@@ -92,18 +145,6 @@ export default function AdminMaterialFormPage() {
         },
       });
 
-      const materialId = isEdit ? (id as string) : response.material.id;
-      const selectedDoc = selectedDocRef.current;
-      if (selectedDoc) {
-        setDocUploading(true);
-        const formData = new FormData();
-        formData.append("file", selectedDoc);
-        await apiFetch(`/admin/materials/${materialId}/source-doc`, {
-          method: "POST",
-          body: formData,
-        });
-      }
-
       toast({ title: isEdit ? "Material yangilandi" : "Material yaratildi" });
       navigate("/admin/materials");
     } catch (error) {
@@ -114,7 +155,7 @@ export default function AdminMaterialFormPage() {
       });
     } finally {
       setSaving(false);
-      setDocUploading(false);
+      setDocConverting(false);
     }
   };
 
@@ -175,14 +216,37 @@ export default function AdminMaterialFormPage() {
               ref={docInputRef}
               type="file"
               accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-              onChange={(event) => {
+              onChange={async (event) => {
                 const file = event.target.files?.[0] || null;
-                selectedDocRef.current = file;
+                if (!file) return;
+                try {
+                  setDocConverting(true);
+                  setDocUploadedImagesCount(0);
+                  setDocProgressText("DOCX import boshlanmoqda...");
+                  const html = await convertDocxToHtml(file);
+                  setForm((prev) => ({ ...prev, contentHtml: html }));
+                  toast({ title: "DOCX import qilindi", description: "Kontent (HTML) maydoniga joylandi." });
+                } catch (error) {
+                  toast({
+                    title: "DOCX import xatolik",
+                    description: error instanceof Error ? error.message : "Amal bajarilmadi",
+                    variant: "destructive",
+                  });
+                } finally {
+                  setDocConverting(false);
+                  setDocProgressText("");
+                  event.target.value = "";
+                }
               }}
             />
             <div className="text-sm text-muted-foreground">
-              Agar DOCX tanlasangiz, material kontenti avtomatik import qilinadi (rasmlar ham).
+              DOCX tanlasangiz, kontent avtomatik HTML ga o'giriladi va editorga joylanadi (rasmlar ham).
             </div>
+            {docConverting ? (
+              <div className="text-sm text-muted-foreground">
+                {docProgressText || "Import qilinmoqda..."} {docUploadedImagesCount > 0 ? `(rasmlar: ${docUploadedImagesCount})` : ""}
+              </div>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -204,8 +268,8 @@ export default function AdminMaterialFormPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button onClick={onSubmit} disabled={saving || docUploading}>
-              {saving || docUploading ? "Saqlanmoqda..." : isEdit ? "Yangilash" : "Yaratish"}
+            <Button onClick={onSubmit} disabled={saving || docConverting}>
+              {saving || docConverting ? "Saqlanmoqda..." : isEdit ? "Yangilash" : "Yaratish"}
             </Button>
             <Button variant="outline" onClick={() => navigate("/admin/materials")}>
               Bekor qilish
